@@ -1,0 +1,19 @@
+﻿namespace Framework.IL.Hotfix.Module.UI
+{
+    public static class Layer
+    {
+        public const int NORMAL = 0;
+        public const int POPUP = 1;
+        public const int TOP = 10000;
+    }
+
+    //view的特征 写全了太长了
+    public enum B
+    {
+        NONE = 1 << 0,
+        CLEARSTACK = 1 << 1,
+        CACHE = 1 << 2,
+        CLEARBACK = 1 << 3,
+        SHOWBLUR = 1 << 4,
+    }
+}

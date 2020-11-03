@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace Framework.IL.Hotfix.Module.UI
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    public class Bind : Attribute
+    {
+        public string viewModelName { get; }
+        public int layer { get; }
+        public B behaviour { get; }
+
+        public Bind(string viewModelName, int layer, B behaviour)
+        {
+            this.viewModelName = viewModelName;
+            this.layer = layer;
+            this.behaviour = behaviour;
+        }
+    }
+}
