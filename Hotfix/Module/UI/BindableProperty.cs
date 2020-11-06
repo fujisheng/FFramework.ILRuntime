@@ -1,5 +1,4 @@
-﻿using Framework.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Framework.IL.Hotfix.Module.UI
@@ -9,7 +8,6 @@ namespace Framework.IL.Hotfix.Module.UI
         T newValue;
         T oldValue;
         List<Action<T, T>> actions = new List<Action<T, T>>();
-        //List<MethodInvoker> invokers = new List<MethodInvoker>();
 
         public BindableProperty(T value = default)
         {
@@ -52,11 +50,6 @@ namespace Framework.IL.Hotfix.Module.UI
             {
                 actions[i].Invoke(oldValue, newValue);
             }
-
-            //for (int i = 0; i < invokers.Count; i++)
-            //{
-            //   // invokers[i].Invoke<object, object>(oldValue, newValue);
-            //}
         }
 
         public void AddListener(System.Action<T, T> onValueChanged)
@@ -68,15 +61,6 @@ namespace Framework.IL.Hotfix.Module.UI
             actions.Add(onValueChanged);
         }
 
-        //public void AddListenerWithMethodInvoker(MethodInvoker onValueChanged)
-        //{
-        //    if (invokers.Contains(onValueChanged))
-        //    {
-        //        return;
-        //    }
-        //    invokers.Add(onValueChanged);
-        //}
-
         public void RemoveListener(System.Action<T, T> onValueChanged)
         {
             if (actions.Contains(onValueChanged))
@@ -85,34 +69,9 @@ namespace Framework.IL.Hotfix.Module.UI
             }
         }
 
-        //public void RemoveListenerWithMethodInvoker(MethodInvoker onValueChanged)
-        //{
-        //    if (invokers.Contains(onValueChanged))
-        //    {
-        //        invokers.Remove(onValueChanged);
-        //    }
-        //}
-
-        //public void RemoveMethodInvokerWithOwner(object owner)
-        //{
-        //    List<MethodInvoker> removeList = new List<MethodInvoker>();
-        //    for(int i = 0; i < invokers.Count; i++)
-        //    {
-        //        //if(invokers[i].owner == owner)
-        //        //{
-        //        //    removeList.Add(invokers[i]);
-        //        //}
-        //    }
-
-        //    for(int i = 0; i < removeList.Count; i++)
-        //    {
-        //        invokers.Remove(removeList[i]);
-        //    }
-        //}
-
         public override string ToString()
         {
-            return "Hotfix.Logic.BindableProperty";
+            return "Framework.IL.Hotfix.Module.UI.BindableProperty";
         }
     }
 }

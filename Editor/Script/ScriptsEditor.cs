@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Framework.Utility;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -22,59 +23,38 @@ namespace Framework.Module.Script.Editor
             CompilationPipeline.assemblyCompilationFinished += AssemblyCompilationFinishedCallback;
         }
 
-        //[MenuItem("Tools/Script/CopyDLL")]
-        //static void CopyDll()
-        //{
-        //    // Copy最新的pdb文件
-        //    string[] dirs =
-        //    {
-        //        "./Temp/UnityVS_bin/Debug",
-        //        "./Temp/UnityVS_bin/Release",
-        //        "./Temp/bin/Debug",
-        //        "./Temp/bin/Release"
-        //    };
-
-        //    DateTime dateTime = DateTime.MinValue;
-        //    string newestDir = "";
-        //    foreach (string dir in dirs)
-        //    {
-        //        string gameDllPath = Path.Combine(dir, GameHotfixDll);
-        //        if (!File.Exists(gameDllPath))
-        //        {
-        //            continue;
-        //        }
-        //        FileInfo fi = new FileInfo(gameDllPath);
-        //        DateTime lastWriteTimeUtc = fi.LastWriteTimeUtc;
-        //        if (lastWriteTimeUtc > dateTime)
-        //        {
-        //            newestDir = dir;
-        //            dateTime = lastWriteTimeUtc;
-        //        }
-        //    }
-
-        //    if (newestDir != "")
-        //    {
-        //        File.Copy(Path.Combine(newestDir, GameHotfixDll), Path.Combine(CodeDir, "Hotfix.dll.bytes"), true);
-        //        File.Copy(Path.Combine(newestDir, GameHotfixPdb), Path.Combine(CodeDir, "Hotfix.pdb.bytes"), true);
-        //        Debug.Log($"ilrt 复制Hotfix.dll, Hotfix.pdb到Sources/DLL完成");
-        //    }
-        //    //AssetDatabase.Refresh();
-        //}
-
         static void AssemblyCompilationFinishedCallback(string file, CompilerMessage[] messages)
         {
             CopyToSources(file, FrameworkHotfixDll, FrameworkHotfixPdb);
             CopyToSources(file, GameHotfixDll, GameHotfixPdb);
         }
 
+        //将原始的dll拷贝到对应路径并且加密
         static void CopyToSources(string file, string dllName, string pdbName)
         {
             if (file.EndsWith(dllName))
             {
+                CopyAndEncryption(file, dllName);
                 string pdbPath = file.Replace(dllName, pdbName);
-                File.Copy(file, Path.Combine(CodeDir, $"{dllName}.bytes"), true);
-                File.Copy(pdbPath, Path.Combine(CodeDir, $"{pdbName}.bytes"), true);
+                CopyAndEncryption(pdbPath, pdbName);
                 AssetDatabase.Refresh();
+            }
+        }
+
+        static void CopyAndEncryption(string file, string fileName)
+        {
+            if (file.EndsWith(fileName))
+            {
+                FileStream fsread = File.Open(file, FileMode.Open);
+                int fsLen = (int)fsread.Length;
+                byte[] buffer = new byte[fsLen];
+                fsread.Read(buffer, 0, buffer.Length);
+                fsread.Close();
+                FileStream fsW = new FileStream(Path.Combine(CodeDir, $"{fileName}.bytes"), FileMode.Create);
+                byte[] enctryptBytes = EncryptionUtility.AESEncrypt(buffer);
+                fsW.Write(enctryptBytes, 0, enctryptBytes.Length);
+                fsW.Flush();
+                fsW.Close();
             }
         }
     }

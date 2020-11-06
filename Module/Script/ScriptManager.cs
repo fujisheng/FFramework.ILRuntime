@@ -1,5 +1,6 @@
 ﻿using Framework.IL.Module.Script;
 using Framework.Module.Resource;
+using Framework.Utility;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.TypeSystem;
 using ILRuntime.Mono.Cecil.Pdb;
@@ -47,29 +48,28 @@ namespace Framework.Module.Script
             delegateConvertor = @delegate;
         }
 
-        public async Task Load(string name)
+        public async Task Load(string label)
         {
             appdomain = new AppDomain();
             resourceLoader = ResourceLoader.Ctor();
-            await resourceLoader.PerloadAll<TextAsset>(name);
-
-            TextAsset frameworkDllAsset = resourceLoader.Get<TextAsset>(frameworkDllName);
-            TextAsset gameAsset = resourceLoader.Get<TextAsset>(gameDllName);
-            frameworkDllStream = new MemoryStream(frameworkDllAsset.bytes);
-            gameDllStream = new MemoryStream(gameAsset.bytes);
-#if DEBUG || UNITY_EDITOR
-            TextAsset frameworkPdbAsset = resourceLoader.Get<TextAsset>(frameworkPdbName);
-            TextAsset gamePdbAsset = resourceLoader.Get<TextAsset>(gamePdbName);
-            frameworkPdbStream = new MemoryStream(frameworkPdbAsset.bytes);
-            gamePdbStream = new MemoryStream(gamePdbAsset.bytes);
-
-            appdomain.LoadAssembly(frameworkDllStream, frameworkPdbStream, new PdbReaderProvider());
-            appdomain.LoadAssembly(gameDllStream, gamePdbStream, new PdbReaderProvider());
-#else
-            appdomain.LoadAssembly(frameworkDllStream, null, new PdbReaderProvider());
-            appdomain.LoadAssembly(gameDllStream, null, new PdbReaderProvider());
-#endif
+            await resourceLoader.PerloadAll<TextAsset>(label);
+            LoadDll(frameworkDllName, frameworkPdbName, out frameworkDllStream, out frameworkPdbStream);
+            LoadDll(gameDllName, gamePdbName, out gameDllStream, out gamePdbStream);
             InitializeILRuntime();
+        }
+
+        void LoadDll(string dllName, string pdbName, out MemoryStream dllStream, out MemoryStream pdbStream)
+        {
+            TextAsset dllAsset = resourceLoader.Get<TextAsset>(dllName);
+            dllStream = new MemoryStream(EncryptionUtility.AESDecrypt(dllAsset.bytes));
+#if DEBUG || UNITY_EDITOR
+            TextAsset pdbAsset = resourceLoader.Get<TextAsset>(pdbName);
+            pdbStream = new MemoryStream(EncryptionUtility.AESDecrypt(pdbAsset.bytes));
+
+            appdomain.LoadAssembly(dllStream, pdbStream, new PdbReaderProvider());
+#else
+            appdomain.LoadAssembly(dllStream, null, new PdbReaderProvider());
+#endif
         }
 
         void InitializeILRuntime()
@@ -188,24 +188,8 @@ namespace Framework.Module.Script
             removeKeys.Clear();
         }
 
-        public void OnUpdate()
+        public void ShutDown()
         {
-            InvokeMethod("Hotfix.Main", "OnUpdate");
-        }
-
-        public void OnFixedUpdate()
-        {
-            InvokeMethod("Hotfix.Main", "OnFixedUpdate");
-        }
-
-        public void OnLateUpdate()
-        {
-            InvokeMethod("Hotfix.Main", "OnLateUpdate");
-        }
-
-        public void OnTearDown()
-        {
-            InvokeMethod("Hotfix.Main", "OnTearDown");
             typeCache.Clear();
             methodCache.Clear();
             frameworkDllStream?.Close();
