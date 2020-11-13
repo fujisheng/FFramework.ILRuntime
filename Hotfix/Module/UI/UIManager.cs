@@ -38,7 +38,7 @@ namespace Framework.IL.Hotfix.Module.UI
 
         public void Close(string viewName, object args = null)
         {
-            Bind bindInfo = UICache.GetBindInfo(viewName);
+            var bindInfo = UICache.GetBindInfo(viewName);
             if(bindInfo.layer != Layer.TOP)
             {
                 Debug.LogWarning($"{viewName}是需要入栈的view 请使用Back方法！！！");

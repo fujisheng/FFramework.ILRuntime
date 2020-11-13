@@ -4,6 +4,7 @@ using Framework.Utility;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.TypeSystem;
 using ILRuntime.Mono.Cecil.Pdb;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -16,15 +17,10 @@ namespace Framework.Module.Script
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
-        MemoryStream frameworkDllStream;
-        MemoryStream frameworkPdbStream;
-        MemoryStream gameDllStream;
-        MemoryStream gamePdbStream;
-
-        readonly string frameworkDllName = "Framework.IL.Hotfix.dll";
-        readonly string frameworkPdbName = "Framework.IL.Hotfix.pdb";
-        readonly string gameDllName = "Game.Hotfix.dll";
-        readonly string gamePdbName = "Game.Hotfix.pdb";
+        (MemoryStream dll, MemoryStream pdb) frameworkStream;
+        (MemoryStream dll, MemoryStream pdb) gameStream;
+        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
+        readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
 
         Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
         Dictionary<Vector3Int, IMethod> methodCache = new Dictionary<Vector3Int, IMethod>();
@@ -53,23 +49,24 @@ namespace Framework.Module.Script
             appdomain = new AppDomain();
             resourceLoader = ResourceLoader.Ctor();
             await resourceLoader.PerloadAll<TextAsset>(label);
-            LoadDll(frameworkDllName, frameworkPdbName, out frameworkDllStream, out frameworkPdbStream);
-            LoadDll(gameDllName, gamePdbName, out gameDllStream, out gamePdbStream);
+            frameworkStream = LoadDll(frameworkDllNames.dll, frameworkDllNames.pdb);
+            gameStream = LoadDll(gameDllNames.dll, gameDllNames.pdb);
             InitializeILRuntime();
         }
 
-        void LoadDll(string dllName, string pdbName, out MemoryStream dllStream, out MemoryStream pdbStream)
+        (MemoryStream dllStream, MemoryStream pdbStream) LoadDll(string dllName, string pdbName)
         {
             TextAsset dllAsset = resourceLoader.Get<TextAsset>(dllName);
-            dllStream = new MemoryStream(EncryptionUtility.AESDecrypt(dllAsset.bytes));
+            var dllStream = new MemoryStream(EncryptionUtility.AESDecrypt(dllAsset.bytes));
 #if DEBUG || UNITY_EDITOR
             TextAsset pdbAsset = resourceLoader.Get<TextAsset>(pdbName);
-            pdbStream = new MemoryStream(EncryptionUtility.AESDecrypt(pdbAsset.bytes));
+            var pdbStream = new MemoryStream(EncryptionUtility.AESDecrypt(pdbAsset.bytes));
 
             appdomain.LoadAssembly(dllStream, pdbStream, new PdbReaderProvider());
 #else
             appdomain.LoadAssembly(dllStream, null, new PdbReaderProvider());
 #endif
+            return (dllStream, pdbStream);
         }
 
         void InitializeILRuntime()
@@ -192,14 +189,12 @@ namespace Framework.Module.Script
         {
             typeCache.Clear();
             methodCache.Clear();
-            frameworkDllStream?.Close();
-            frameworkPdbStream?.Close();
-            gameDllStream?.Close();
-            gamePdbStream?.Close();
-            frameworkDllStream = null;
-            frameworkPdbStream = null;
-            gameDllStream = null;
-            gamePdbStream = null;
+            frameworkStream.dll?.Close();
+            frameworkStream.pdb?.Close();
+            gameStream.dll?.Close();
+            gameStream.pdb?.Close();
+            frameworkStream = default;
+            gameStream = default;
         }
     }
 }

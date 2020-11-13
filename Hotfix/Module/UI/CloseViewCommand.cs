@@ -6,7 +6,7 @@ namespace Framework.IL.Hotfix.Module.UI
     class CloseViewCommand : ICommand
     {
         string viewName;
-        Bind info;
+        BindInfo info;
         object param;
 
         IViewModel viewModel;
@@ -17,7 +17,7 @@ namespace Framework.IL.Hotfix.Module.UI
             this.viewName = viewName;
             this.param = param;
 
-            info = null;
+            info = default;
             viewModel = null;
             view = null;
         }

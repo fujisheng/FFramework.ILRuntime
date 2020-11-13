@@ -34,9 +34,16 @@ namespace Framework.IL.Hotfix.Module.UI
         }
     }
 
+    public struct BindInfo
+    {
+        public string viewModelName { get; internal set; }
+        public int layer { get; internal set; }
+        public B behaviour { get; internal set; }
+    }
+
     static class UICache
     {
-        static Dictionary<string, Bind> viewInfoCache = new Dictionary<string, Bind>();
+        static Dictionary<string, BindInfo> viewInfoCache = new Dictionary<string, BindInfo>();
         static Dictionary<string, IView> viewInstanceCache = new Dictionary<string, IView>();
         //static Dictionary<string, IAsset> viewAssetCache = new Dictionary<string, IAsset>();
         static Dictionary<string, GameObject> viewGameObjectCache = new Dictionary<string, GameObject>();
@@ -47,19 +54,25 @@ namespace Framework.IL.Hotfix.Module.UI
 
         static IResourceManager resourceManager;
 
-        public static Bind GetBindInfo(string viewName)
+        public static BindInfo GetBindInfo(string viewName)
         {
-            bool get = viewInfoCache.TryGetValue(viewName, out Bind viewInfo);
+            bool get = viewInfoCache.TryGetValue(viewName, out BindInfo viewInfo);
             if (get)
             {
                 return viewInfo;
             }
-            viewInfo = ViewUtility.GetViewInfo(viewName);
-            if (viewInfo == null)
+            var info = ViewUtility.GetViewInfo(viewName);
+            if (info == null)
             {
                 Debug.LogError($"没有找到这个view的viewInfo:{viewName}");
-                return null;
+                return default;
             }
+            viewInfo = new BindInfo
+            {
+                behaviour = info.behaviour,
+                viewModelName = info.viewModelName,
+                layer = info.layer,
+            };
             viewInfoCache.Add(viewName, viewInfo);
             return viewInfo;
         }

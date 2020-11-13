@@ -8,7 +8,7 @@ namespace Framework.IL.Hotfix.Module.UI
     class OpenViewCommand : ICommand
     {
         string viewName;
-        Bind info;
+        BindInfo info;
         object param;
 
         IViewModel viewModel;
@@ -19,7 +19,7 @@ namespace Framework.IL.Hotfix.Module.UI
             this.viewName = viewName;
             this.param = param;
 
-            info = null;
+            info = default;
             viewModel = null;
             view = null;
         }
