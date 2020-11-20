@@ -1,6 +1,5 @@
-﻿using Hotfix.Utility;
-using Framework.Module.Resource;
-using Framework.Utility;
+﻿using Framework.Module.Resource;
+using Hotfix.Utility;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,40 +11,21 @@ namespace Framework.IL.Hotfix.Module.UI
         public string viewName{ get { if (_viewName == null) _viewName = GetType().Name; return _viewName; }}
         public GameObject gameObject { get; private set; }
         public Transform transform { get; private set; }
-        protected IViewModel viewModel { get; private set; }
+        protected Context context { get; private set; }
         protected IResourceLoader resourceLoader { get; private set; }
 
         public virtual void Init(){}
 
-        public void SetResourcesLoader(IResourceLoader resourceLoader)
-        {
-            this.resourceLoader = resourceLoader;
-        }
-
-        public void OnCreated(GameObject gameObject)
+        public void OnCreate(GameObject gameObject, Context context)
         {
             this.gameObject = gameObject;
-            transform = gameObject.transform;
-        }
-
-        /// <summary>
-        /// 绑定viewModel
-        /// </summary>
-        /// <param name="viewModel"></param>
-        public void BindViewModel(IViewModel viewModel)
-        {
-            if (this.viewModel != null)
-            {
-                return;
-            }
-            this.viewModel = viewModel;
+            this.transform = gameObject.transform;
+            this.context = context;
+            this.resourceLoader = context.resourceLoader;
         }
 
         public virtual async Task Opening()
         {
-            string viewModelTypeName = viewModel.GetType().FullName;
-            string typeName = GetType().FullName;
-            //PropertyBinder.Bind(viewModelTypeName,viewModel, typeName, this)
             ViewUtility.AddAllButtonEvent(this);
             await Task.Delay(0);
         }
@@ -63,11 +43,6 @@ namespace Framework.IL.Hotfix.Module.UI
         }
 
         public virtual void OnClose(object param) { }
-
-        public void UnbindViewModel(IViewModel viewModel)
-        {
-            this.viewModel = null;
-        }
 
         public virtual void OnDestroy()
         {

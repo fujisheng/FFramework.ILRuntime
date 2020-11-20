@@ -1,17 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
-    public class BindableProperty<T>
+    //标记接口
+    public interface IBindableProperty{}
+
+    //可绑定的属性
+    public struct BindableProperty<T> : IBindableProperty
     {
         T newValue;
         T oldValue;
-        List<Action<T, T>> actions = new List<Action<T, T>>();
+        List<Action<T, T>> actions;
+        List<(object owner, MethodInfo methodInfo)> methodInfos;
 
         public BindableProperty(T value = default)
         {
-            this.newValue = value;
+            actions = new List<Action<T, T>>();
+            methodInfos = new List<(object owner, MethodInfo methodInfo)>();
+            newValue = value;
+            oldValue = default;
         }
 
         /// <summary>
@@ -26,8 +35,8 @@ namespace Framework.IL.Hotfix.Module.UI
             }
             set
             {
-                this.oldValue = newValue;
-                this.newValue = value;
+                oldValue = newValue;
+                newValue = value;
                 if (oldValue.Equals(newValue))
                 {
                     return;
@@ -37,7 +46,25 @@ namespace Framework.IL.Hotfix.Module.UI
         }
 
         /// <summary>
-        /// 强制触发改变
+        /// 设置值，可以指定是否强制触发listener
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="force"></param>
+        public void SetValue(T value, bool force = false)
+        {
+            if (!force)
+            {
+                Value = value;
+                return;
+            }
+
+            oldValue = newValue;
+            newValue = value;
+            InvokeAll(oldValue, newValue);
+        }
+
+        /// <summary>
+        /// 强制触发listener
         /// </summary>
         public void Sync()
         {
@@ -50,8 +77,18 @@ namespace Framework.IL.Hotfix.Module.UI
             {
                 actions[i].Invoke(oldValue, newValue);
             }
+
+            for(int i = 0; i < methodInfos.Count; i++)
+            {
+                var info = methodInfos[i];
+                info.methodInfo.Invoke(info.owner, new object[] {oldValue, newValue});
+            }
         }
 
+        /// <summary>
+        /// 添加一个listener
+        /// </summary>
+        /// <param name="onValueChanged"></param>
         public void AddListener(System.Action<T, T> onValueChanged)
         {
             if (actions.Contains(onValueChanged))
@@ -61,6 +98,28 @@ namespace Framework.IL.Hotfix.Module.UI
             actions.Add(onValueChanged);
         }
 
+        /// <summary>
+        /// 添加一个methodInfo的listener
+        /// </summary>
+        /// <param name="owner">methodInfo的拥有者</param>
+        /// <param name="methodInfo"></param>
+        public void AddListener(object owner, MethodInfo methodInfo)
+        {
+            foreach(var info in methodInfos)
+            {
+                if(info.owner == owner && info.methodInfo == methodInfo)
+                {
+                    return;
+                }
+            }
+
+            methodInfos.Add((owner, methodInfo));
+        }
+
+        /// <summary>
+        /// 移除一个listener
+        /// </summary>
+        /// <param name="onValueChanged"></param>
         public void RemoveListener(System.Action<T, T> onValueChanged)
         {
             if (actions.Contains(onValueChanged))
@@ -69,9 +128,26 @@ namespace Framework.IL.Hotfix.Module.UI
             }
         }
 
+        /// <summary>
+        /// 移除一个methodInfo的listener
+        /// </summary>
+        /// <param name="owner">methodInfo的拥有者</param>
+        /// <param name="methodInfo"></param>
+        public void RemoveListener(object owner, MethodInfo methodInfo)
+        {
+            for(int i = 0; i < methodInfos.Count; i++)
+            {
+                var info = methodInfos[i];
+                if (info.owner == owner && info.methodInfo == methodInfo)
+                {
+                    methodInfos.RemoveAt(i);
+                }
+            }
+        }
+
         public override string ToString()
         {
-            return "Framework.IL.Hotfix.Module.UI.BindableProperty";
+            return $"BindableProperty:{Value}";
         }
     }
 }

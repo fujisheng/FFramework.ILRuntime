@@ -16,4 +16,14 @@ namespace Framework.IL.Hotfix.Module.UI
             this.behaviour = behaviour;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class BindProperty : Attribute
+    {
+        public string propertyName { get; }
+        public BindProperty(string propertyName)
+        {
+            this.propertyName = propertyName;
+        }
+    }
 }
