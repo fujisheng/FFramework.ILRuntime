@@ -2,6 +2,13 @@
 
 namespace Framework.IL.Hotfix.Module.UI
 {
+    public enum BindType
+    {
+        View,
+        Function,
+        Text,
+        Sprite,
+    }
     [AttributeUsage(AttributeTargets.Class)]
     public class Bind : Attribute
     {

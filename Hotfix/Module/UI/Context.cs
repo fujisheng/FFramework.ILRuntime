@@ -8,50 +8,6 @@ using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
-    public static class Contexts
-    {
-        static List<Context> contextCache = new List<Context>();
-        static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
-
-        /// <summary>
-        /// 初始化 直接初始化所有的ViewModel
-        /// </summary>
-        public static void Init()
-        {
-            foreach(var type in Assembly.GetExecutingAssembly().GetTypes())
-            {
-                if(type.IsAssignableFrom(typeof(IViewModel)) && !type.IsAbstract && type.IsClass)
-                {
-                    var viewModel = Activator.CreateInstance(type) as IViewModel;
-                    viewModel.Init();
-                    viewModelCache.Add(type, viewModel);
-                }
-            }
-        }
-
-        public static Context GetOrCreate<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
-        {
-            var viewModelType = typeof(TViewModel);
-            var viewType = typeof(TView);
-
-            foreach(var context in contextCache)
-            {
-                if(context.viewModel.GetType() == viewModelType && context.view.GetType() == viewType)
-                {
-                    return context;
-                }
-            }
-
-            bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
-            if (!get)
-            {
-                viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
-            }
-
-            var newContext = new Context((TViewModel)viewModel, ResourceLoader.Ctor());
-            return newContext;
-        }
-    }
     public class Context
     {
         internal IViewModel viewModel { get; private set; }
@@ -155,21 +111,20 @@ namespace Framework.IL.Hotfix.Module.UI
         /// </summary>
         /// <param name="bindView">是否绑定View</param>
         /// <param name="bindAlreadyBinded">是否绑定已经绑定的 请注意如果已经绑定过的再绑定到同一个listener的话 每次改变这个listener将会执行多次</param>
-        public void BindPropertys(bool bindView = true, bool withAlreadyBinded = false)
+        public void BindPropertys(object target, bool withAlreadyBinded = false)
         {
             var propertys = GetPropertys(withAlreadyBinded);
-            object owner = bindView ? (object)view : viewModel;
             foreach(var property in propertys)
             {
                 var addMethodInfo = property.property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
                 string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", property.propertyName);
-                var listenerMethodInfo = owner.GetType().GetMethod(listenerMethodName);
+                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName);
                 if(addMethodInfo == null || listenerMethodInfo == null)
                 {
                     continue;
                 }
 
-                addMethodInfo.Invoke(property.property, new object[] {owner, listenerMethodInfo});
+                addMethodInfo.Invoke(property.property, new object[] {target, listenerMethodInfo});
             }
         }
 
@@ -189,10 +144,9 @@ namespace Framework.IL.Hotfix.Module.UI
         /// 通过BindProperty这个特性来绑定对应的Property到某个方法
         /// </summary>
         /// <param name="bindView">是否是绑定view</param>
-        public void BindWithAttribute(bool bindView = true)
+        public void BindWithAttribute(object target)
         {
-            var owner = bindView ? view : (object)viewModel;
-            var methodInfos = owner.GetType().GetMethods();
+            var methodInfos = target.GetType().GetMethods();
             if(methodInfos == null)
             {
                 return;
@@ -208,13 +162,13 @@ namespace Framework.IL.Hotfix.Module.UI
                 var property = GetProperty(bindInfo.propertyName);
                 var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
                 string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", bindInfo.propertyName);
-                var listenerMethodInfo = owner.GetType().GetMethod(listenerMethodName);
+                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName);
                 if (addMethodInfo == null || listenerMethodInfo == null)
                 {
                     continue;
                 }
 
-                addMethodInfo.Invoke(property, new object[] { owner, listenerMethodInfo });
+                addMethodInfo.Invoke(property, new object[] { target, listenerMethodInfo });
             }
         }
 
