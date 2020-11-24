@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
@@ -10,11 +10,11 @@ namespace Framework.IL.Hotfix.Module.UI
         //View的生命周期
         void Init();
         void OnCreate(GameObject gameObject, Context context);
-        Task Opening();
+        UniTask Opening();
         void OnOpen(object param);
         void OnFrontground();
         void OnBackground();
-        Task Closeing();
+        UniTask Closeing();
         void OnClose(object param);
         void OnDestroy();
     }

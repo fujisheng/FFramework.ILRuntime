@@ -1,5 +1,5 @@
-﻿using Framework.Utility;
-using System.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
+using Framework.Utility;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
@@ -22,7 +22,7 @@ namespace Framework.IL.Hotfix.Module.UI
             view = null;
         }
 
-        public async Task Execute()
+        public async UniTask Execute()
         {
             view = UICache.GetRegistedView(viewName);
             if(view == null)

@@ -1,4 +1,4 @@
-﻿using Framework.Async;
+﻿using Cysharp.Threading.Tasks;
 using Framework.Module.Resource;
 using Framework.Utility;
 using System;
@@ -16,14 +16,22 @@ namespace Framework.IL.Hotfix.Module.UI
 
         Dictionary<string, IBindableProperty> propertyCache;
 
-        internal Context(IViewModel viewModel, IResourceLoader loader)
+        internal Context(IViewModel viewModel, IView view, IResourceLoader loader)
         {
             this.viewModel = viewModel;
+            this.view = view;
             this.resourceLoader = loader;
             propertyCache = new Dictionary<string, IBindableProperty>();
+            this.viewModel.Init();
+            this.view.Init();
         }
 
-        internal async FTask<IView> CreateView()
+        public void Release()
+        {
+            
+        }
+
+        public async UniTask<IView> CreateView()
         {
             var viewObj = await resourceLoader.InstantiateAsync(view.viewName);
             GameObject.DontDestroyOnLoad(viewObj);

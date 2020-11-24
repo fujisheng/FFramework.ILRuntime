@@ -7,7 +7,6 @@ namespace Framework.IL.Hotfix.Module.UI
 {
     public static class Contexts
     {
-        static List<Context> contextCache = new List<Context>();
         static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
 
         /// <summary>
@@ -29,23 +28,15 @@ namespace Framework.IL.Hotfix.Module.UI
         public static Context GetOrCreate<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
         {
             var viewModelType = typeof(TViewModel);
-            var viewType = typeof(TView);
-
-            foreach (var context in contextCache)
-            {
-                if (context.viewModel.GetType() == viewModelType && context.view.GetType() == viewType)
-                {
-                    return context;
-                }
-            }
-
             bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
             if (!get)
             {
-                viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
+                viewModel = Activator.CreateInstance<TViewModel>();
             }
 
-            var newContext = new Context((TViewModel)viewModel, ResourceLoader.Ctor());
+            var view = Activator.CreateInstance<TView>();
+
+            var newContext = new Context((TViewModel)viewModel, view, ResourceLoader.Ctor());
             return newContext;
         }
     }

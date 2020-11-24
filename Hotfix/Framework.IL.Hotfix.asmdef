@@ -2,7 +2,8 @@
     "name": "Framework.IL.Hotfix",
     "references": [
         "GUID:eccfeb5d31fe9e143aa6bf752d62e365",
-        "GUID:2dffbfe525adfd74da5e4b5befa4eb8c"
+        "GUID:2dffbfe525adfd74da5e4b5befa4eb8c",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

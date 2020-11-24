@@ -1,6 +1,6 @@
-﻿using Framework.Module.Resource;
+﻿using Cysharp.Threading.Tasks;
+using Framework.Module.Resource;
 using Hotfix.Utility;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
@@ -24,10 +24,10 @@ namespace Framework.IL.Hotfix.Module.UI
             this.resourceLoader = context.resourceLoader;
         }
 
-        public virtual async Task Opening()
+        public virtual async UniTask Opening()
         {
             ViewUtility.AddAllButtonEvent(this);
-            await Task.Delay(0);
+            await UniTask.Delay(0);
         }
 
         public virtual void OnOpen(object param){}
@@ -36,10 +36,10 @@ namespace Framework.IL.Hotfix.Module.UI
 
         public virtual void OnBackground() { }
 
-        public virtual async Task Closeing()
+        public virtual async UniTask Closeing()
         {
             ViewUtility.RemoveAllButtonEvent(this);
-            await Task.Delay(0);
+            await UniTask.Delay(0);
         }
 
         public virtual void OnClose(object param) { }

@@ -1,13 +1,12 @@
-﻿using Framework.IL.Module.Script;
+﻿using Cysharp.Threading.Tasks;
+using Framework.IL.Module.Script;
 using Framework.Module.Resource;
 using Framework.Utility;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.TypeSystem;
 using ILRuntime.Mono.Cecil.Pdb;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 using AppDomain = ILRuntime.Runtime.Enviorment.AppDomain;
 
@@ -44,7 +43,7 @@ namespace Framework.Module.Script
             delegateConvertor = @delegate;
         }
 
-        public async Task Load(string label)
+        public async UniTask Load(string label)
         {
             appdomain = new AppDomain();
             resourceLoader = ResourceLoader.Ctor();

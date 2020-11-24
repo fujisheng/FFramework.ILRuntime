@@ -17,12 +17,12 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <param name="args">参数</param>
         protected void SendCommand(string command, object args = null)
         {
-            if (viewModel == null)
-            {
-                return;
-            }
-            string viewModelTypeName = viewModel.GetType().FullName;
-            string functionName = StringUtility.GetOrAttach("OnCommand_", command);
+            //if (viewModel == null)
+            //{
+            //    return;
+            //}
+            //string viewModelTypeName = viewModel.GetType().FullName;
+            //string functionName = StringUtility.GetOrAttach("OnCommand_", command);
             //MethodInvoker.Invoke(viewModelTypeName, functionName, viewModel, args);
         }
 

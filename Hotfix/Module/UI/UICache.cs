@@ -1,10 +1,9 @@
-﻿using Hotfix.Utility;
+﻿using Cysharp.Threading.Tasks;
 using Framework.Module.Resource;
+using Hotfix.Utility;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using ModuleManager = Framework.Module.ModuleManager;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
@@ -105,7 +104,7 @@ namespace Framework.IL.Hotfix.Module.UI
             viewInstanceCache.Remove(viewName);
         }
 
-        public static async Task<GameObject> GetOrCreateViewGameObject(string gameObjectName)
+        public static async UniTask<GameObject> GetOrCreateViewGameObject(string gameObjectName)
         {
             bool get = viewGameObjectCache.TryGetValue(gameObjectName, out GameObject gameObject);
             if (get)

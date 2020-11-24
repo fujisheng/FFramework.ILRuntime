@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
     interface ICommand
     {
-        Task Execute();
+        UniTask Execute();
     }
 }
