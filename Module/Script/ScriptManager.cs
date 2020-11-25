@@ -16,13 +16,10 @@ namespace Framework.Module.Script
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
-        (MemoryStream dll, MemoryStream pdb) frameworkStream;
         (MemoryStream dll, MemoryStream pdb) gameStream;
-        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
-
-        Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
-        Dictionary<Vector3Int, IMethod> methodCache = new Dictionary<Vector3Int, IMethod>();
+        readonly Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
+        readonly Dictionary<(string typeName, string methodName, int paramCount), IMethod> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), IMethod>();
 
         IAdpaterReginster adpaterReginster;
         ICLRBinderReginster CLRBinderReginster;
@@ -48,7 +45,6 @@ namespace Framework.Module.Script
             appdomain = new AppDomain();
             resourceLoader = ResourceLoader.Ctor();
             await resourceLoader.PerloadAll<TextAsset>(label);
-            frameworkStream = LoadDll(frameworkDllNames.dll, frameworkDllNames.pdb);
             gameStream = LoadDll(gameDllNames.dll, gameDllNames.pdb);
             InitializeILRuntime();
         }
@@ -102,10 +98,7 @@ namespace Framework.Module.Script
 
         public IMethod GetAndCacheMethod(string typeName, string methodName, int paramCount)
         {
-            int left = typeName.GetHashCode();
-            int right = methodName.GetHashCode();
-            Vector3Int key = new Vector3Int(left, right, paramCount);
-            bool get = methodCache.TryGetValue(key, out IMethod method);
+            bool get = methodCache.TryGetValue((typeName, methodName, paramCount), out IMethod method);
             
             if (get)
             {
@@ -124,7 +117,7 @@ namespace Framework.Module.Script
                 //Debug.LogWarning($"Type:{className} 中不包含这个方法 functionName:{methodName} paramCount:{paramCount}");
                 return null;
             }
-            methodCache.Add(key, method);
+            methodCache.Add((typeName, methodName, paramCount), method);
             return method;
         }
 
@@ -140,7 +133,7 @@ namespace Framework.Module.Script
             return appdomain.Invoke(method, owner, args);
         }
 
-        List<Vector3Int> removeKeys = new List<Vector3Int>();
+        List<(string, string, int)> removeKeys = new List<(string, string, int)>();
         public void Release(string typeName)
         {
             if (typeCache.ContainsKey(typeName))
@@ -151,8 +144,8 @@ namespace Framework.Module.Script
             removeKeys.Clear();
             foreach(var kv in methodCache)
             {
-                Vector3Int key = kv.Key;
-                if(key.x == typeName.GetHashCode())
+                var key = kv.Key;
+                if(key.typeName == typeName)
                 {
                     removeKeys.Add(key);
                 }
@@ -170,8 +163,8 @@ namespace Framework.Module.Script
             removeKeys.Clear();
             foreach (var kv in methodCache)
             {
-                Vector3Int key = kv.Key;
-                if (key.x == typeName.GetHashCode() && key.y == methodName.GetHashCode())
+                var key = kv.Key;
+                if (key.typeName == typeName && key.methodName == methodName)
                 {
                     removeKeys.Add(key);
                 }
@@ -188,11 +181,8 @@ namespace Framework.Module.Script
         {
             typeCache.Clear();
             methodCache.Clear();
-            frameworkStream.dll?.Close();
-            frameworkStream.pdb?.Close();
             gameStream.dll?.Close();
             gameStream.pdb?.Close();
-            frameworkStream = default;
             gameStream = default;
         }
     }

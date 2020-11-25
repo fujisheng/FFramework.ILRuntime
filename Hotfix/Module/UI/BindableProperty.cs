@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
@@ -8,12 +9,20 @@ namespace Framework.IL.Hotfix.Module.UI
     public interface IBindableProperty{}
 
     //可绑定的属性
-    public struct BindableProperty<T> : IBindableProperty
+    public class BindableProperty<T> : IBindableProperty
     {
         T newValue;
         T oldValue;
         List<Action<T, T>> actions;
         List<(object owner, MethodInfo methodInfo)> methodInfos;
+
+        public BindableProperty()
+        {
+            actions = new List<Action<T, T>>();
+            methodInfos = new List<(object owner, MethodInfo methodInfo)>();
+            oldValue = default;
+            newValue = default;
+        }
 
         public BindableProperty(T value = default)
         {
@@ -112,7 +121,7 @@ namespace Framework.IL.Hotfix.Module.UI
                     return;
                 }
             }
-
+            Debug.Log($"AddListenerWithMethodInfo=>{owner}, {methodInfo}");
             methodInfos.Add((owner, methodInfo));
         }
 

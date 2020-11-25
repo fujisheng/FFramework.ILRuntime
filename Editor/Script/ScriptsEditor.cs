@@ -13,8 +13,6 @@ namespace Framework.Module.Script.Editor
     {
         private const string ScriptAssembliesDir = "Library/ScriptAssemblies";
         private const string CodeDir = "Assets/Sources/Code/";
-        private const string FrameworkHotfixDll = "Framework.IL.Hotfix.dll";
-        private const string FrameworkHotfixPdb = "Framework.IL.Hotfix.pdb";
         private const string GameHotfixDll = "Game.Hotfix.dll";
         private const string GameHotfixPdb = "Game.Hotfix.pdb";
 
@@ -25,7 +23,6 @@ namespace Framework.Module.Script.Editor
 
         static void AssemblyCompilationFinishedCallback(string file, CompilerMessage[] messages)
         {
-            CopyToSources(file, FrameworkHotfixDll, FrameworkHotfixPdb);
             CopyToSources(file, GameHotfixDll, GameHotfixPdb);
         }
 

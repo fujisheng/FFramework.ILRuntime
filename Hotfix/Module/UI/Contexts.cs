@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
@@ -35,7 +36,6 @@ namespace Framework.IL.Hotfix.Module.UI
             }
 
             var view = Activator.CreateInstance<TView>();
-
             var newContext = new Context((TViewModel)viewModel, view, ResourceLoader.Ctor());
             return newContext;
         }

@@ -88,8 +88,8 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     throw new Exception($"can not get property {propertyName}, please bind viewModel first");
                 }
-                var fieldInfo = viewModel.GetType().GetField(propertyName);
-                if (fieldInfo == null || !fieldInfo.FieldType.IsAssignableFrom(typeof(IBindableProperty)))
+                var fieldInfo = viewModel.GetType().GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic);
+                if (fieldInfo == null || ! typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
                 {
                     throw new Exception($"can not get property {propertyName} with {viewModel.GetType().FullName}, please check property name is right");
                 }
@@ -162,21 +162,23 @@ namespace Framework.IL.Hotfix.Module.UI
 
             foreach(var methodInfo in methodInfos)
             {
+                Debug.Log(methodInfo.Name);
                 var bindInfo = methodInfo.GetCustomAttribute<BindProperty>();
+                Debug.Log(bindInfo);
                 if(bindInfo == null)
                 {
                     continue;
                 }
+                Debug.Log("sssssssssssssssssssssssssssssssssssssssss");
                 var property = GetProperty(bindInfo.propertyName);
                 var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
-                string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", bindInfo.propertyName);
-                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName);
-                if (addMethodInfo == null || listenerMethodInfo == null)
+                Debug.Log($"addMethodInfo=>{addMethodInfo}");
+                if (addMethodInfo == null)
                 {
                     continue;
                 }
 
-                addMethodInfo.Invoke(property, new object[] { target, listenerMethodInfo });
+                addMethodInfo.Invoke(property, new object[] { target, methodInfo });
             }
         }
 
