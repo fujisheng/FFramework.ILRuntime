@@ -56,8 +56,9 @@ namespace Framework.IL.Hotfix.Module.UI
 
             List<(string propertyName, IBindableProperty property)> result = new List<(string propertyName, IBindableProperty property)>();
 
-            foreach (var fieldInfo in fieldInfos)
+            for (int i = 0; i < fieldInfos.Length; i++)
             {
+                var fieldInfo = fieldInfos[i];
                 bool get = propertyCache.TryGetValue(fieldInfo.Name, out IBindableProperty field);
                 if (!get)
                 {
@@ -122,8 +123,9 @@ namespace Framework.IL.Hotfix.Module.UI
         public void BindPropertys(object target, bool withAlreadyBinded = false)
         {
             var propertys = GetPropertys(withAlreadyBinded);
-            foreach(var property in propertys)
+            for(int i = 0; i < propertys.Count; i++)
             {
+                var property = propertys[i];
                 var addMethodInfo = property.property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
                 string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", property.propertyName);
                 var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName);
@@ -160,19 +162,27 @@ namespace Framework.IL.Hotfix.Module.UI
                 return;
             }
 
-            foreach(var methodInfo in methodInfos)
+            for(int i = 0; i < methodInfos.Length; i++)
             {
-                Debug.Log(methodInfo.Name);
-                var bindInfo = methodInfo.GetCustomAttribute<BindProperty>();
-                Debug.Log(bindInfo);
+                var methodInfo = methodInfos[i];
+                BindProperty bindInfo = null;
+                var attributes = methodInfo.GetCustomAttributes(true);
+                for(int j = 0; j < attributes.Length; j++)
+                {
+                    var attribute = attributes[j];
+                    if (attribute is BindProperty)
+                    {
+                        bindInfo = attribute as BindProperty;
+                        break;
+                    }
+                }
+
                 if(bindInfo == null)
                 {
                     continue;
                 }
-                Debug.Log("sssssssssssssssssssssssssssssssssssssssss");
                 var property = GetProperty(bindInfo.propertyName);
-                var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
-                Debug.Log($"addMethodInfo=>{addMethodInfo}");
+                var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
                 if (addMethodInfo == null)
                 {
                     continue;

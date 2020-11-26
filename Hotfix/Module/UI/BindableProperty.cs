@@ -121,7 +121,6 @@ namespace Framework.IL.Hotfix.Module.UI
                     return;
                 }
             }
-            Debug.Log($"AddListenerWithMethodInfo=>{owner}, {methodInfo}");
             methodInfos.Add((owner, methodInfo));
         }
 
