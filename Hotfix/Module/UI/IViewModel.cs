@@ -3,8 +3,11 @@
     public interface IViewModel
     {
         void Init();
-        void BindProperty();
-        void BindView(IView view);
-        void UnbindView(IView view);
+        void Release();
+    }
+
+    public interface IPerloadViewModel
+    {
+
     }
 }

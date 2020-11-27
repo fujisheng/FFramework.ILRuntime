@@ -5,7 +5,9 @@ namespace Framework.IL.Hotfix.Module.UI
 {
     public interface IView
     {
-        string viewName { get; }
+        string ViewName { get; }
+        GameObject gameObject { get; }
+        Transform transform { get; }
 
         //View的生命周期
         void Init();

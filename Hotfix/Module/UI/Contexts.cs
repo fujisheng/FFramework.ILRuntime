@@ -9,15 +9,28 @@ namespace Framework.IL.Hotfix.Module.UI
     public static class Contexts
     {
         static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
+        static Dictionary<Type, BindInfo> bindInfoCache = new Dictionary<Type, BindInfo>();
+
+        static bool Is<T>(Type type)
+        {
+            try
+            {
+                return typeof(T).IsAssignableFrom(type);
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
-        /// 初始化 直接初始化所有的ViewModel
+        /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
         /// </summary>
         public static void Init()
         {
             foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                if (type.IsAssignableFrom(typeof(IViewModel)) && !type.IsAbstract && type.IsClass)
+                if (Is<IViewModel>(type) && Is<IPerloadViewModel>(type) && !type.IsAbstract && type.IsClass)
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;
                     viewModel.Init();
@@ -26,18 +39,158 @@ namespace Framework.IL.Hotfix.Module.UI
             }
         }
 
-        public static Context GetOrCreate<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
+        /// <summary>
+        /// 获取ViewModel
+        /// </summary>
+        /// <param name="viewModelType">viewModelType</param>
+        /// <returns></returns>
+        public static IViewModel GetViewModel(Type viewModelType)
         {
-            var viewModelType = typeof(TViewModel);
+            //if (!Is<IViewModel>(viewModelType))
+            //{
+            //    throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
+            //}
+
+            Debug.Log("sdfadfadfasdfadfadfadfadf");
+            Debug.Log(viewModelType);
             bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
+            Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
             if (!get)
             {
-                viewModel = Activator.CreateInstance<TViewModel>();
+                Debug.Log(Activator.CreateInstance(viewModelType));
+                viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
+                viewModel.Init();
+                viewModelCache.Add(viewModelType, viewModel);
+            }
+            Debug.Log("dfllllllllllllllllllllllllllllllllllllll");
+            return viewModel;
+        }
+
+        /// <summary>
+        /// 获取ViewModel
+        /// </summary>
+        /// <typeparam name="TViewModel"></typeparam>
+        /// <returns></returns>
+        public static IViewModel GetViewModel<TViewModel>() where TViewModel : IViewModel
+        {
+            return GetViewModel(typeof(TViewModel));
+        }
+
+        
+        /// <summary>
+        /// 获取Bind信息
+        /// </summary>
+        /// <param name="viewType"></param>
+        /// <returns></returns>
+        public static BindInfo GetBindInfo(Type viewType)
+        {
+            if (!Is<IView>(viewType))
+            {
+                throw new Exception($"get bind info failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
 
-            var view = Activator.CreateInstance<TView>();
-            var newContext = new Context((TViewModel)viewModel, view, ResourceLoader.Ctor());
-            return newContext;
+            var get = bindInfoCache.TryGetValue(viewType, out BindInfo bindInfo);
+            if (get)
+            {
+                return bindInfo;
+            }
+            var attributes = viewType.GetCustomAttributes(true);
+            for (int j = 0; j < attributes.Length; j++)
+            {
+                var attribute = attributes[j];
+                if (!(attribute is Bind))
+                {
+                    continue;
+                }
+
+                var bind = attribute as Bind;
+                Debug.Log(bind);
+                Debug.Log(bind.ViewModelType);
+                //if (!Is<IViewModel>(bind.ViewModelType))
+                //{
+                //    throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
+                //}
+                //Debug.Log("ssssssssssssssssssssssssssssssssss");
+                bindInfo = new BindInfo(bind.ViewModelType, bind.Layer, bind.Behaviour, bind.AssetName);
+                bindInfoCache.Add(viewType, bindInfo);
+                Debug.Log(bindInfo);
+                return bindInfo;
+            }
+            throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");
+        }
+
+        /// <summary>
+        /// 获取Bind信息
+        /// </summary>
+        /// <typeparam name="TView"></typeparam>
+        /// <returns></returns>
+        public static BindInfo GetBindInfo<TView>() where TView : IView
+        {
+            return GetBindInfo(typeof(TView));
+        }
+
+        /// <summary>
+        /// 创建Context
+        /// </summary>
+        /// <param name="viewModelType">ViewModel的类型</param>
+        /// <param name="viewType">View的类型</param>
+        /// <returns>context</returns>
+        public static Context Create(Type viewModelType, Type viewType)
+        {
+            Debug.Log("CreateWith Type");
+            var viewModel = GetViewModel(viewModelType);
+            Debug.Log(viewModel);
+            if (!Is<IView>(viewType))
+            {
+                throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
+            }
+            var view = Activator.CreateInstance(viewType) as IView;
+            Debug.Log(view);
+            var context = new Context(viewModel, view, ResourceLoader.Ctor(), GetBindInfo(viewType));
+            return context;
+        }
+
+        /// <summary>
+        /// 创建Context
+        /// </summary>
+        /// <typeparam name="TViewModel">viewModel Type</typeparam>
+        /// <typeparam name="TView">view Type</typeparam>
+        /// <returns>context</returns>
+        public static Context Create<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
+        {
+            return Create(typeof(TViewModel), typeof(TView));
+        }
+
+        /// <summary>
+        /// 创建Context
+        /// </summary>
+        /// <param name="viewModelType">viewModel Type</param>
+        /// <typeparam name="TView">view Type</typeparam>
+        /// <returns>context</returns>
+        public static Context Create<TView>(Type viewModelType) where TView : IView
+        {
+            return Create(viewModelType, typeof(TView));
+        }
+
+        /// <summary>
+        /// 创建Context
+        /// </summary>
+        /// <param name="viewType">View的类型</param>
+        /// <returns>context</returns>
+        public static Context Create1(Type viewType)
+        {
+            var bindInfo = GetBindInfo(viewType);
+            return Create(bindInfo.ViewModelType, viewType);
+        }
+
+        /// <summary>
+        /// 创建Context
+        /// </summary>
+        /// <typeparam name="TView">View</typeparam>
+        /// <returns>context</returns>
+        public static Context Create<TView>() where TView : IView
+        {
+            return Create1(typeof(TView));
         }
     }
 }

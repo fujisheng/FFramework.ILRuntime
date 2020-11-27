@@ -2,72 +2,12 @@
 using Framework.Utility;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace Hotfix.Utility
 {
     public static class ViewUtility
     {
-        public static IViewModel CreateViewModel(string typeName)
-        {
-            string realTypeName = StringUtility.GetOrAttach("Hotfix.Logic.", typeName);
-            try
-            {
-                Type viewModelType = Type.GetType(realTypeName);
-                Debug.Log(viewModelType);
-                object instance = Activator.CreateInstance(viewModelType);
-                return instance as IViewModel;
-            }
-            catch
-            {
-                Debug.LogError($"没有找到这个viewModel {realTypeName}");
-                return null;
-            }
-        }
-
-        public static Bind GetViewInfo(string typeName)
-        {
-            string realTypeName = StringUtility.GetOrAttach("Hotfix.Logic.", typeName);
-            try
-            {
-                Type viewType =  Type.GetType(realTypeName);
-                MemberInfo memberInfo = viewType;
-                object[] attributes = memberInfo.GetCustomAttributes(true);
-                for (int i = 0; i < attributes.Length; i++)
-                {
-                    object attribute = attributes[i];
-                    if (attribute is Bind)
-                    {
-                        return attribute as Bind;
-                    }
-                }
-                return null;
-            }
-            catch
-            {
-                Debug.LogError($"没有找到这个viewType {realTypeName}");
-                return null;
-            }
-        }
-
-        public static IView CreatView(string typeName)
-        {
-            string realTypeName = StringUtility.GetOrAttach("Hotfix.Logic.", typeName);
-            try
-            {
-                Type viewType = Type.GetType(realTypeName);
-                object instance = Activator.CreateInstance(viewType);
-                return instance as IView;
-            }
-            catch
-            {
-                Debug.LogError($"没有找到这个viewType {realTypeName}");
-                return null;
-            }
-        }
-
         public static void AddAllButtonEvent(object view)
         {
             try

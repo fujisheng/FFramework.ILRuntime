@@ -11,7 +11,6 @@ namespace Framework.Module.Script.Editor
     [InitializeOnLoad]
     public class ScriptsEditor : UnityEditor.Editor
     {
-        private const string ScriptAssembliesDir = "Library/ScriptAssemblies";
         private const string CodeDir = "Assets/Sources/Code/";
         private const string GameHotfixDll = "Game.Hotfix.dll";
         private const string GameHotfixPdb = "Game.Hotfix.pdb";
@@ -43,8 +42,7 @@ namespace Framework.Module.Script.Editor
             if (file.EndsWith(fileName))
             {
                 FileStream fsread = File.Open(file, FileMode.Open);
-                int fsLen = (int)fsread.Length;
-                byte[] buffer = new byte[fsLen];
+                byte[] buffer = new byte[fsread.Length];
                 fsread.Read(buffer, 0, buffer.Length);
                 fsread.Close();
                 FileStream fsW = new FileStream(Path.Combine(CodeDir, $"{fileName}.bytes"), FileMode.Create);

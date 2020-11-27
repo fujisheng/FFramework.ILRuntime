@@ -8,20 +8,20 @@ namespace Framework.IL.Hotfix.Module.UI
     public abstract partial class View : IView
     {
         string _viewName = null;
-        public string viewName{ get { if (_viewName == null) _viewName = GetType().Name; return _viewName; }}
+        public string ViewName{ get { if (_viewName == null) _viewName = GetType().Name; return _viewName; }}
         public GameObject gameObject { get; private set; }
         public Transform transform { get; private set; }
-        protected Context context { get; private set; }
-        protected IResourceLoader resourceLoader { get; private set; }
+        protected Context Context { get; private set; }
+        protected IResourceLoader ResourceLoader { get; private set; }
 
         public virtual void Init(){}
 
         public void OnCreate(GameObject gameObject, Context context)
         {
             this.gameObject = gameObject;
-            this.transform = gameObject.transform;
-            this.context = context;
-            this.resourceLoader = context.resourceLoader;
+            transform = gameObject.transform;
+            Context = context;
+            ResourceLoader = context.ResourceLoader;
         }
 
         public virtual async UniTask Opening()
@@ -46,7 +46,7 @@ namespace Framework.IL.Hotfix.Module.UI
 
         public virtual void OnDestroy()
         {
-            resourceLoader.Release();
+            ResourceLoader.Release();
         }
     }
 }

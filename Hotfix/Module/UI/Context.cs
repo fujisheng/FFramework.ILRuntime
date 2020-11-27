@@ -5,50 +5,74 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Framework.IL.Hotfix.Module.UI
 {
     public class Context
     {
-        internal IViewModel viewModel { get; private set; }
-        internal IView view { get; private set; }
-        internal IResourceLoader resourceLoader { get; private set; }
+        internal IViewModel ViewModel { get; private set; }
+        internal IView View { get; private set; }
+        internal IResourceLoader ResourceLoader { get; private set; }
 
         Dictionary<string, IBindableProperty> propertyCache;
+        BindInfo bindInfo;
 
-        internal Context(IViewModel viewModel, IView view, IResourceLoader loader)
+        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, BindInfo bindInfo)
         {
-            this.viewModel = viewModel;
-            this.view = view;
-            this.resourceLoader = loader;
+            this.ViewModel = viewModel;
+            this.View = view;
+            ResourceLoader = loader;
+            this.bindInfo = bindInfo;
             propertyCache = new Dictionary<string, IBindableProperty>();
-            this.viewModel.Init();
-            this.view.Init();
+            viewModel.Init();
+            view.Init();
         }
 
         public void Release()
         {
-            
+            Debug.Log("Releasesssssssssssssssssssssssssssssssssssssssssssssss");
         }
 
-        public async UniTask<IView> CreateView()
+        internal async UniTask<IView> CreateView()
         {
-            var viewObj = await resourceLoader.InstantiateAsync(view.viewName);
-            GameObject.DontDestroyOnLoad(viewObj);
-            view = Activator.CreateInstance(view.GetType()) as IView;
-            view.OnCreate(viewObj, this);
-            return view;
+            Debug.Log("CreateView");
+            var assetName = bindInfo.AssetName ?? View.ViewName;
+            Debug.Log($"assetName=>{assetName}");
+            var viewObj = await ResourceLoader.InstantiateAsync(assetName);
+            Object.DontDestroyOnLoad(viewObj);
+            View.OnCreate(viewObj, this);
+            return View;
+        }
+
+        internal async UniTask ShowView(object param)
+        {
+            View.gameObject.SetActive(true);
+            await View.Opening();
+            View.OnOpen(param);
+            var methodInfo = ViewModel.GetType().GetMethod(StringUtility.GetOrAttach("OnOpen_", View.ViewName));
+            if (methodInfo != null)
+            {
+                methodInfo.Invoke(ViewModel, new object[] { param });
+            }
+        }
+
+        internal async UniTask HideView(object param)
+        {
+            View.gameObject.SetActive(false);
+            await View.Closeing();
+            View.OnClose(param);
         }
 
         //获取所有的BindableProperty
         List<(string propertyName, IBindableProperty property)> GetPropertys(bool withCached = true)
         {
-            if(viewModel == null)
+            if(ViewModel == null)
             {
                 throw new Exception($"can not get propertys, please bind viewModel first");
             }
 
-            var fieldInfos = viewModel.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic);
+            var fieldInfos = ViewModel.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic);
             if(fieldInfos == null)
             {
                 return null;
@@ -62,12 +86,12 @@ namespace Framework.IL.Hotfix.Module.UI
                 bool get = propertyCache.TryGetValue(fieldInfo.Name, out IBindableProperty field);
                 if (!get)
                 {
-                    if (fieldInfo == null || !fieldInfo.FieldType.IsAssignableFrom(typeof(IBindableProperty)))
+                    if (fieldInfo == null || !typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
                     {
                         continue;
                     }
 
-                    field = fieldInfo.GetValue(viewModel) as IBindableProperty;
+                    field = fieldInfo.GetValue(ViewModel) as IBindableProperty;
                     propertyCache.Add(fieldInfo.Name, field);
                     result.Add((fieldInfo.Name, field));
                 }
@@ -85,17 +109,17 @@ namespace Framework.IL.Hotfix.Module.UI
             bool get = propertyCache.TryGetValue(propertyName, out IBindableProperty field);
             if (!get)
             {
-                if (viewModel == null)
+                if (ViewModel == null)
                 {
                     throw new Exception($"can not get property {propertyName}, please bind viewModel first");
                 }
-                var fieldInfo = viewModel.GetType().GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic);
+                var fieldInfo = ViewModel.GetType().GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic);
                 if (fieldInfo == null || ! typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
                 {
-                    throw new Exception($"can not get property {propertyName} with {viewModel.GetType().FullName}, please check property name is right");
+                    throw new Exception($"can not get property {propertyName} with {ViewModel.GetType().FullName}, please check property name is right");
                 }
 
-                field = fieldInfo.GetValue(viewModel) as IBindableProperty;
+                field = fieldInfo.GetValue(ViewModel) as IBindableProperty;
                 if(field != null)
                 {
                     propertyCache.Add(propertyName, field);
@@ -153,7 +177,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <summary>
         /// 通过BindProperty这个特性来绑定对应的Property到某个方法
         /// </summary>
-        /// <param name="bindView">是否是绑定view</param>
+        /// <param name="target">要绑定的目标</param>
         public void BindWithAttribute(object target)
         {
             var methodInfos = target.GetType().GetMethods();
@@ -181,7 +205,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     continue;
                 }
-                var property = GetProperty(bindInfo.propertyName);
+                var property = GetProperty(bindInfo.PropertyName);
                 var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
                 if (addMethodInfo == null)
                 {

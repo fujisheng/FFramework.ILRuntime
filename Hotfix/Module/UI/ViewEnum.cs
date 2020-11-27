@@ -8,12 +8,12 @@
     }
 
     //view的特征 写全了太长了
-    public enum B
+    public static class B
     {
-        NONE = 1 << 0,
-        CLEARSTACK = 1 << 1,
-        CACHE = 1 << 2,
-        CLEARBACK = 1 << 3,
-        SHOWBLUR = 1 << 4,
+        public const int NONE = 1 << 0;
+        public const int CLEARSTACK = 1 << 1;
+        public const int CACHE = 1 << 2;
+        public const int CLEARBACK = 1 << 3;
+        public const int SHOWBLUR = 1 << 4;
     }
 }
