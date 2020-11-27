@@ -46,15 +46,12 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <returns></returns>
         public static IViewModel GetViewModel(Type viewModelType)
         {
-            //if (!Is<IViewModel>(viewModelType))
-            //{
-            //    throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
-            //}
+            if (!Is<IViewModel>(viewModelType))
+            {
+                throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
+            }
 
-            Debug.Log("sdfadfadfasdfadfadfadfadf");
-            Debug.Log(viewModelType);
             bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
-            Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
             if (!get)
             {
                 Debug.Log(Activator.CreateInstance(viewModelType));
@@ -62,7 +59,6 @@ namespace Framework.IL.Hotfix.Module.UI
                 viewModel.Init();
                 viewModelCache.Add(viewModelType, viewModel);
             }
-            Debug.Log("dfllllllllllllllllllllllllllllllllllllll");
             return viewModel;
         }
 
@@ -104,16 +100,12 @@ namespace Framework.IL.Hotfix.Module.UI
                 }
 
                 var bind = attribute as Bind;
-                Debug.Log(bind);
-                Debug.Log(bind.ViewModelType);
-                //if (!Is<IViewModel>(bind.ViewModelType))
-                //{
-                //    throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
-                //}
-                //Debug.Log("ssssssssssssssssssssssssssssssssss");
+                if (!Is<IViewModel>(bind.ViewModelType))
+                {
+                    throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
+                }
                 bindInfo = new BindInfo(bind.ViewModelType, bind.Layer, bind.Behaviour, bind.AssetName);
                 bindInfoCache.Add(viewType, bindInfo);
-                Debug.Log(bindInfo);
                 return bindInfo;
             }
             throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");
@@ -137,15 +129,12 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <returns>context</returns>
         public static Context Create(Type viewModelType, Type viewType)
         {
-            Debug.Log("CreateWith Type");
             var viewModel = GetViewModel(viewModelType);
-            Debug.Log(viewModel);
             if (!Is<IView>(viewType))
             {
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
             var view = Activator.CreateInstance(viewType) as IView;
-            Debug.Log(view);
             var context = new Context(viewModel, view, ResourceLoader.Ctor(), GetBindInfo(viewType));
             return context;
         }
@@ -177,7 +166,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// </summary>
         /// <param name="viewType">View的类型</param>
         /// <returns>context</returns>
-        public static Context Create1(Type viewType)
+        public static Context Create(Type viewType)
         {
             var bindInfo = GetBindInfo(viewType);
             return Create(bindInfo.ViewModelType, viewType);
@@ -190,7 +179,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <returns>context</returns>
         public static Context Create<TView>() where TView : IView
         {
-            return Create1(typeof(TView));
+            return Create(typeof(TView));
         }
     }
 }

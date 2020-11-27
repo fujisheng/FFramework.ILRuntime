@@ -34,18 +34,16 @@ namespace Framework.IL.Hotfix.Module.UI
             Debug.Log("Releasesssssssssssssssssssssssssssssssssssssssssssssss");
         }
 
-        internal async UniTask<IView> CreateView()
+        public async UniTask<IView> CreateView()
         {
-            Debug.Log("CreateView");
             var assetName = bindInfo.AssetName ?? View.ViewName;
-            Debug.Log($"assetName=>{assetName}");
             var viewObj = await ResourceLoader.InstantiateAsync(assetName);
             Object.DontDestroyOnLoad(viewObj);
             View.OnCreate(viewObj, this);
             return View;
         }
 
-        internal async UniTask ShowView(object param)
+        public async UniTask ShowView(object param)
         {
             View.gameObject.SetActive(true);
             await View.Opening();
@@ -57,7 +55,7 @@ namespace Framework.IL.Hotfix.Module.UI
             }
         }
 
-        internal async UniTask HideView(object param)
+        public async UniTask HideView(object param)
         {
             View.gameObject.SetActive(false);
             await View.Closeing();

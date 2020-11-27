@@ -71,9 +71,9 @@ namespace Framework.Module.Script
             appdomain.UnityMainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 #endif
             adpaterReginster.Reginst(appdomain);
-            CLRBinderReginster.Reginst(appdomain);
             valueTypeBinderReginster.Reginst(appdomain);
             delegateConvertor.Convert(appdomain);
+            CLRBinderReginster.Reginst(appdomain);
         }
 
         IType GetOrCacheType(string typeName)
