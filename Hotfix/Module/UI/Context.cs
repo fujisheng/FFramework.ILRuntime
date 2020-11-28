@@ -17,6 +17,7 @@ namespace Framework.IL.Hotfix.Module.UI
 
         Dictionary<string, IBindableProperty> propertyCache;
         BindInfo bindInfo;
+        BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
 
         internal Context(IViewModel viewModel, IView view, IResourceLoader loader, BindInfo bindInfo)
         {
@@ -25,7 +26,6 @@ namespace Framework.IL.Hotfix.Module.UI
             ResourceLoader = loader;
             this.bindInfo = bindInfo;
             propertyCache = new Dictionary<string, IBindableProperty>();
-            viewModel.Init();
             view.Init();
         }
 
@@ -70,7 +70,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 throw new Exception($"can not get propertys, please bind viewModel first");
             }
 
-            var fieldInfos = ViewModel.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic);
+            var fieldInfos = ViewModel.GetType().GetFields(flags);
             if(fieldInfos == null)
             {
                 return null;
@@ -111,7 +111,8 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     throw new Exception($"can not get property {propertyName}, please bind viewModel first");
                 }
-                var fieldInfo = ViewModel.GetType().GetField(propertyName, BindingFlags.Public | BindingFlags.NonPublic);
+
+                var fieldInfo = ViewModel.GetType().GetField(propertyName, flags);
                 if (fieldInfo == null || ! typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
                 {
                     throw new Exception($"can not get property {propertyName} with {ViewModel.GetType().FullName}, please check property name is right");
@@ -134,7 +135,7 @@ namespace Framework.IL.Hotfix.Module.UI
             {
                 throw new Exception($"{propertyName} is {property.GetType().FullName} not {typeof(BindableProperty<T>)}");
             }
-            return (BindableProperty<T>)GetProperty(propertyName);
+            return (BindableProperty<T>)property;
         }
 
         /// <summary>
@@ -148,9 +149,9 @@ namespace Framework.IL.Hotfix.Module.UI
             for(int i = 0; i < propertys.Count; i++)
             {
                 var property = propertys[i];
-                var addMethodInfo = property.property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic);
+                var addMethodInfo = property.property.GetType().GetMethod("AddListener", flags);
                 string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", property.propertyName);
-                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName);
+                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName, flags);
                 if(addMethodInfo == null || listenerMethodInfo == null)
                 {
                     continue;
@@ -178,7 +179,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <param name="target">要绑定的目标</param>
         public void BindWithAttribute(object target)
         {
-            var methodInfos = target.GetType().GetMethods();
+            var methodInfos = target.GetType().GetMethods(flags);
             if(methodInfos == null)
             {
                 return;
@@ -204,7 +205,7 @@ namespace Framework.IL.Hotfix.Module.UI
                     continue;
                 }
                 var property = GetProperty(bindInfo.PropertyName);
-                var addMethodInfo = property.GetType().GetMethod("AddListener", BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
+                var addMethodInfo = property.GetType().GetMethod("AddListener", flags, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
                 if (addMethodInfo == null)
                 {
                     continue;

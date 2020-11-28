@@ -33,6 +33,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 if (Is<IViewModel>(type) && Is<IPerloadViewModel>(type) && !type.IsAbstract && type.IsClass)
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;
+                    Debug.Log($"<color=blue>{type.Name} is perloaded</color>");
                     viewModel.Init();
                     viewModelCache.Add(type, viewModel);
                 }
@@ -54,7 +55,6 @@ namespace Framework.IL.Hotfix.Module.UI
             bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
             if (!get)
             {
-                Debug.Log(Activator.CreateInstance(viewModelType));
                 viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
                 viewModel.Init();
                 viewModelCache.Add(viewModelType, viewModel);
