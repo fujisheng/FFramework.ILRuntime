@@ -153,17 +153,6 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <summary>
         /// 创建Context
         /// </summary>
-        /// <param name="viewModelType">viewModel Type</param>
-        /// <typeparam name="TView">view Type</typeparam>
-        /// <returns>context</returns>
-        public static Context Create<TView>(Type viewModelType) where TView : IView
-        {
-            return Create(viewModelType, typeof(TView));
-        }
-
-        /// <summary>
-        /// 创建Context
-        /// </summary>
         /// <param name="viewType">View的类型</param>
         /// <returns>context</returns>
         public static Context Create(Type viewType)
