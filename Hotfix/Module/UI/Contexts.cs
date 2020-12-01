@@ -135,7 +135,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
             var view = Activator.CreateInstance(viewType) as IView;
-            var context = new Context(viewModel, view, ResourceLoader.Ctor(), GetBindInfo(viewType));
+            var context = new Context(viewModel, view, new ResourceLoader(), GetBindInfo(viewType));
             return context;
         }
 

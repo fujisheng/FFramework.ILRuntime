@@ -24,7 +24,7 @@ namespace Framework.Module.Script
 
         public async UniTask Load(string label)
         {
-            resourceLoader = ResourceLoader.Ctor();
+            resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
             LoadDll(gameDllNames.dll, gameDllNames.pdb);
         }

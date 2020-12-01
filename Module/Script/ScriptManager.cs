@@ -43,7 +43,7 @@ namespace Framework.Module.Script
         public async UniTask Load(string label)
         {
             appdomain = new AppDomain();
-            resourceLoader = ResourceLoader.Ctor();
+            resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
             gameStream = LoadDll(gameDllNames.dll, gameDllNames.pdb);
             InitializeILRuntime();
