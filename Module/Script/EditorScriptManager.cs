@@ -22,6 +22,35 @@ namespace Framework.Module.Script
             get { return instance ?? (instance = new EditorScriptManager()); }
         }
 
+        string[] types;
+        /// <summary>
+        /// 所有加载的类型名
+        /// </summary>
+        public string[] Types
+        {
+            get
+            {
+                if(types != null)
+                {
+                    return types;
+                }
+                
+                var allType = assembly.GetTypes();
+                types = new string[allType.Length];
+                for(int i = 0; i < allType.Length; i++)
+                {
+                    types[i] = allType[i].FullName;
+                }
+
+                return types;
+            }
+        }
+
+        /// <summary>
+        /// 加载dll
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns></returns>
         public async UniTask Load(string label)
         {
             resourceLoader = new ResourceLoader();
@@ -87,6 +116,14 @@ namespace Framework.Module.Script
             return method;
         }
 
+        /// <summary>
+        /// 执行一个方法
+        /// </summary>
+        /// <param name="className">类名全称</param>
+        /// <param name="methodName">方法名</param>
+        /// <param name="owner">类实例</param>
+        /// <param name="args">参数</param>
+        /// <returns></returns>
         public object InvokeMethod(string className, string methodName, object owner = null, params object[] args)
         {
             int paramCount = args.Length;
@@ -100,6 +137,10 @@ namespace Framework.Module.Script
         }
 
         List<(string, string, int)> removeKeys = new List<(string, string, int)>();
+        /// <summary>
+        /// 释放某个类型的方法缓存
+        /// </summary>
+        /// <param name="typeName"></param>
         public void Release(string typeName)
         {
             if (typeCache.ContainsKey(typeName))
@@ -124,6 +165,11 @@ namespace Framework.Module.Script
             removeKeys.Clear();
         }
 
+        /// <summary>
+        /// 释放某个类型的某个方法的缓存
+        /// </summary>
+        /// <param name="typeName"></param>
+        /// <param name="methodName"></param>
         public void Release(string typeName, string methodName)
         {
             removeKeys.Clear();
@@ -148,6 +194,7 @@ namespace Framework.Module.Script
             typeCache.Clear();
             methodCache.Clear();
             assembly = null;
+            types = null;
         }
     }
 }

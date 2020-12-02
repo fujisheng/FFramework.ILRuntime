@@ -1,7 +1,7 @@
 ﻿using Framework.Module.Resource;
+using Framework.Module.Script;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace Framework.IL.Hotfix.Module.UI
@@ -27,14 +27,20 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <summary>
         /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
         /// </summary>
-        public static void Init()
+        public static void Init(IScriptManager scriptManager)
         {
-            foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach(var typeName in scriptManager.Types)
             {
+                var type = Type.GetType(typeName);
+                if(type == null)
+                {
+                    continue;
+                }
+
                 if (Is<IViewModel>(type) && Is<IPerloadViewModel>(type) && !type.IsAbstract && type.IsClass)
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;
-                    Debug.Log($"<color=blue>{type.Name} is perloaded</color>");
+                    Debug.Log($"<color=blue>{type.FullName} is perloaded</color>");
                     viewModel.Init();
                     viewModelCache.Add(type, viewModel);
                 }

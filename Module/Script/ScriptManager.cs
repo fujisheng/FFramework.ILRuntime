@@ -32,6 +32,36 @@ namespace Framework.Module.Script
             get { return instance ?? (instance = new ScriptManager()); }
         }
 
+        string[] types;
+        /// <summary>
+        /// 所有加载的类型名
+        /// </summary>
+        public string[] Types
+        {
+            get
+            {
+                if(types != null)
+                {
+                    return types;
+                }
+                types = new string[appdomain.LoadedTypes.Count];
+                int index = 0;
+                foreach (var key in appdomain.LoadedTypes.Keys)
+                {
+                    types[index] = key;
+                    index++;
+                }
+                return types;
+            }
+        }
+
+        /// <summary>
+        /// 设置各种绑定器
+        /// </summary>
+        /// <param name="adpater"></param>
+        /// <param name="clr"></param>
+        /// <param name="valueType"></param>
+        /// <param name="delegate"></param>
         public void SetReginster(IAdpaterReginster adpater, ICLRBinderReginster clr, IValueTypeBinderReginster valueType, IDelegateConvertor @delegate)
         {
             adpaterReginster = adpater;
@@ -40,6 +70,11 @@ namespace Framework.Module.Script
             delegateConvertor = @delegate;
         }
 
+        /// <summary>
+        /// 加载dll
+        /// </summary>
+        /// <param name="label">dll的标签</param>
+        /// <returns></returns>
         public async UniTask Load(string label)
         {
             appdomain = new AppDomain();
@@ -125,6 +160,14 @@ namespace Framework.Module.Script
             return method;
         }
 
+        /// <summary>
+        /// 执行一个方法
+        /// </summary>
+        /// <param name="className">类名全称</param>
+        /// <param name="methodName">方法名</param>
+        /// <param name="owner">类实例</param>
+        /// <param name="args">参数</param>
+        /// <returns></returns>
         public object InvokeMethod(string className, string methodName, object owner = null, params object[] args)
         {
             int paramCount = args.Length;
@@ -138,6 +181,10 @@ namespace Framework.Module.Script
         }
 
         List<(string, string, int)> removeKeys = new List<(string, string, int)>();
+        /// <summary>
+        /// 释放一个类型的方法缓存
+        /// </summary>
+        /// <param name="typeName"></param>
         public void Release(string typeName)
         {
             if (typeCache.ContainsKey(typeName))
@@ -162,6 +209,11 @@ namespace Framework.Module.Script
             removeKeys.Clear();
         }
 
+        /// <summary>
+        /// 释放某个类型的某个方法缓存
+        /// </summary>
+        /// <param name="typeName"></param>
+        /// <param name="methodName"></param>
         public void Release(string typeName, string methodName)
         {
             removeKeys.Clear();
@@ -188,6 +240,7 @@ namespace Framework.Module.Script
             gameStream.dll?.Close();
             gameStream.pdb?.Close();
             gameStream = default;
+            types = null;
         }
     }
 }
