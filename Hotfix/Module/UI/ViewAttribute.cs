@@ -2,36 +2,20 @@
 
 namespace Framework.IL.Hotfix.Module.UI
 {
-    public struct BindInfo
-    {
-        public Type ViewModelType { get; }
-        public string AssetName { get; }
-        public int Layer { get; }
-        public int Behaviour { get; }
-
-        public BindInfo(Type viewModelType, int layer = UI.Layer.NORMAL, int behaviour = B.NONE, string assetName = null)
-        {
-            ViewModelType = viewModelType;
-            AssetName = assetName;
-            Layer = layer;
-            Behaviour = behaviour;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Class)]
     public class Bind : Attribute
     {
         public Type ViewModelType { get; }
         public string AssetName { get; }
         public int Layer { get; }
-        public int Behaviour { get; }
+        public int Flag { get; }
 
-        public Bind(Type viewModelType, int layer = UI.Layer.NORMAL, int behaviour = B.NONE, string assetName = null)
+        public Bind(Type viewModelType, int layer = UI.Layer.NORMAL, int behaviour = UI.Flag.NONE, string assetName = null)
         {
             ViewModelType = viewModelType;
             AssetName = assetName;
             Layer = layer;
-            Behaviour = behaviour;
+            Flag = behaviour;
         }
     }
 

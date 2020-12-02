@@ -7,8 +7,7 @@
         public const int TOP = 10000;
     }
 
-    //view的特征 写全了太长了
-    public static class B
+    public static class Flag
     {
         public const int NONE = 1 << 0;
         public const int CLEARSTACK = 1 << 1;

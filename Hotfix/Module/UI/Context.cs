@@ -16,10 +16,10 @@ namespace Framework.IL.Hotfix.Module.UI
         internal IResourceLoader ResourceLoader { get; private set; }
 
         Dictionary<string, IBindableProperty> propertyCache;
-        BindInfo bindInfo;
+        (Type viewModelType, string assetName, int layer, int flag) bindInfo;
         BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
 
-        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, BindInfo bindInfo)
+        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, (Type viewModelType, string assetName, int layer, int flag) bindInfo)
         {
             this.ViewModel = viewModel;
             this.View = view;
@@ -36,7 +36,7 @@ namespace Framework.IL.Hotfix.Module.UI
 
         public async UniTask<IView> CreateView()
         {
-            var assetName = bindInfo.AssetName ?? View.ViewName;
+            var assetName = bindInfo.assetName ?? View.ViewName;
             var viewObj = await ResourceLoader.InstantiateAsync(assetName);
             Object.DontDestroyOnLoad(viewObj);
             View.OnCreate(viewObj, this);

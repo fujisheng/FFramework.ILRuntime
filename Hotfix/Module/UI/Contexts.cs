@@ -10,7 +10,7 @@ namespace Framework.IL.Hotfix.Module.UI
     {
         static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
         static Dictionary<string, Type> viewModelTypeCache = new Dictionary<string, Type>();
-        static Dictionary<Type, BindInfo> bindInfoCache = new Dictionary<Type, BindInfo>();
+        static Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)> bindInfoCache = new Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)>();
 
         static bool Is<T>(Type type)
         {
@@ -95,14 +95,14 @@ namespace Framework.IL.Hotfix.Module.UI
         /// </summary>
         /// <param name="viewType"></param>
         /// <returns></returns>
-        public static BindInfo GetBindInfo(Type viewType)
+        public static (Type viewModelType, string assetName, int layer, int flag) GetBindInfo(Type viewType)
         {
             if (!Is<IView>(viewType))
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
 
-            var get = bindInfoCache.TryGetValue(viewType, out BindInfo bindInfo);
+            var get = bindInfoCache.TryGetValue(viewType, out (Type viewModelType, string assetName, int layer, int flag) bindInfo);
             if (get)
             {
                 return bindInfo;
@@ -123,7 +123,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
                 }
-                bindInfo = new BindInfo(viewModelType, bind.Layer, bind.Behaviour, bind.AssetName);
+                bindInfo = (viewModelType, bind.AssetName, bind.Layer, bind.Flag);
                 bindInfoCache.Add(viewType, bindInfo);
                 return bindInfo;
             }
@@ -135,7 +135,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// </summary>
         /// <typeparam name="TView"></typeparam>
         /// <returns></returns>
-        public static BindInfo GetBindInfo<TView>() where TView : IView
+        public static (Type viewModelType, string assetName, int layer, int flag) GetBindInfo<TView>() where TView : IView
         {
             return GetBindInfo(typeof(TView));
         }
@@ -177,7 +177,7 @@ namespace Framework.IL.Hotfix.Module.UI
         public static Context Create(Type viewType)
         {
             var bindInfo = GetBindInfo(viewType);
-            return Create(bindInfo.ViewModelType, viewType);
+            return Create(bindInfo.viewModelType, viewType);
         }
 
         /// <summary>
