@@ -36,7 +36,6 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     continue;
                 }
-
                 if (Is<IViewModel>(type) && Is<IPerloadViewModel>(type) && !type.IsAbstract && type.IsClass)
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;

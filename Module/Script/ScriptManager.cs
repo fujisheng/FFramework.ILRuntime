@@ -16,6 +16,8 @@ namespace Framework.Module.Script
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
+        (MemoryStream dll, MemoryStream pdb) frameworkStream;
+        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
         (MemoryStream dll, MemoryStream pdb) gameStream;
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
         readonly Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
@@ -80,16 +82,17 @@ namespace Framework.Module.Script
             appdomain = new AppDomain();
             resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
-            gameStream = LoadDll(gameDllNames.dll, gameDllNames.pdb);
+            //frameworkStream = LoadDll(frameworkDllNames);
+            gameStream = LoadDll(gameDllNames);
             InitializeILRuntime();
         }
 
-        (MemoryStream dllStream, MemoryStream pdbStream) LoadDll(string dllName, string pdbName)
+        (MemoryStream dllStream, MemoryStream pdbStream) LoadDll((string dllName, string pdbName) names)
         {
-            TextAsset dllAsset = resourceLoader.Get<TextAsset>(dllName);
+            TextAsset dllAsset = resourceLoader.Get<TextAsset>(names.dllName);
             var dllStream = new MemoryStream(EncryptionUtility.AESDecrypt(dllAsset.bytes));
 #if DEBUG || UNITY_EDITOR
-            TextAsset pdbAsset = resourceLoader.Get<TextAsset>(pdbName);
+            TextAsset pdbAsset = resourceLoader.Get<TextAsset>(names.pdbName);
             var pdbStream = new MemoryStream(EncryptionUtility.AESDecrypt(pdbAsset.bytes));
 
             appdomain.LoadAssembly(dllStream, pdbStream, new PdbReaderProvider());
@@ -239,7 +242,10 @@ namespace Framework.Module.Script
             methodCache.Clear();
             gameStream.dll?.Close();
             gameStream.pdb?.Close();
+            frameworkStream.dll?.Close();
+            frameworkStream.pdb?.Close();
             gameStream = default;
+            frameworkStream = default;
             types = null;
         }
     }

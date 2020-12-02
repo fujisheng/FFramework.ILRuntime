@@ -12,6 +12,7 @@ namespace Framework.Module.Script
     {
         Assembly assembly;
         IResourceLoader resourceLoader;
+        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
         readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
         readonly Dictionary<(string typeName, string methodName, int paramCount), MethodInfo> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), MethodInfo>();
@@ -55,15 +56,17 @@ namespace Framework.Module.Script
         {
             resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
-            LoadDll(gameDllNames.dll, gameDllNames.pdb);
+
+            //LoadDll(frameworkDllNames);
+            LoadDll(gameDllNames);
         }
 
-        void LoadDll(string dllName, string pdbName)
+        void LoadDll((string dll, string pdb) names)
         {
-            TextAsset dllAsset = resourceLoader.Get<TextAsset>(dllName);
+            TextAsset dllAsset = resourceLoader.Get<TextAsset>(names.dll);
             var dllBytes = EncryptionUtility.AESDecrypt(dllAsset.bytes);
 #if DEBUG || UNITY_EDITOR
-            TextAsset pdbAsset = resourceLoader.Get<TextAsset>(pdbName);
+            TextAsset pdbAsset = resourceLoader.Get<TextAsset>(names.pdb);
             var pdbBytes = EncryptionUtility.AESDecrypt(pdbAsset.bytes);
 
             assembly = Assembly.Load(dllBytes, pdbBytes);
