@@ -9,6 +9,7 @@ namespace Framework.IL.Hotfix.Module.UI
     public static class Contexts
     {
         static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
+        static Dictionary<string, Type> viewModelTypeCache = new Dictionary<string, Type>();
         static Dictionary<Type, BindInfo> bindInfoCache = new Dictionary<Type, BindInfo>();
 
         static bool Is<T>(Type type)
@@ -72,6 +73,22 @@ namespace Framework.IL.Hotfix.Module.UI
             return GetViewModel(typeof(TViewModel));
         }
 
+        static Type GetViewModelType(string viewModelName)
+        {
+            bool get = viewModelTypeCache.TryGetValue(viewModelName, out Type type);
+            if (get)
+            {
+                return type;
+            }
+            type = Type.GetType(viewModelName);
+            if(type == null)
+            {
+                return null;
+            }
+            viewModelTypeCache.Add(viewModelName, type);
+            return type;
+        }
+
         
         /// <summary>
         /// 获取Bind信息
@@ -100,11 +117,13 @@ namespace Framework.IL.Hotfix.Module.UI
                 }
 
                 var bind = attribute as Bind;
-                if (!Is<IViewModel>(bind.ViewModelType))
+                //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
+                var viewModelType = GetViewModelType(bind.ViewModelType.ToString());
+                if (!Is<IViewModel>(viewModelType))
                 {
                     throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
                 }
-                bindInfo = new BindInfo(bind.ViewModelType, bind.Layer, bind.Behaviour, bind.AssetName);
+                bindInfo = new BindInfo(viewModelType, bind.Layer, bind.Behaviour, bind.AssetName);
                 bindInfoCache.Add(viewType, bindInfo);
                 return bindInfo;
             }
