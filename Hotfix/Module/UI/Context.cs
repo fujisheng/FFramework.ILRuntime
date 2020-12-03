@@ -26,7 +26,7 @@ namespace Framework.IL.Hotfix.Module.UI
             ResourceLoader = loader;
             this.bindInfo = bindInfo;
             propertyCache = new Dictionary<string, IBindableProperty>();
-            view.Init();
+            view.Initialize();
         }
 
         public void Release()

@@ -14,7 +14,7 @@ namespace Framework.IL.Hotfix.Module.UI
         protected Context Context { get; private set; }
         protected IResourceLoader ResourceLoader { get; private set; }
 
-        public virtual void Init(){}
+        public virtual void Initialize(){}
 
         public void OnCreate(GameObject gameObject, Context context)
         {

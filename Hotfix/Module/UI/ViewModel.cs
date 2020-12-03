@@ -5,7 +5,7 @@ namespace Framework.IL.Hotfix.Module.UI
 {
     public abstract class ViewModel : IViewModel
     {
-        public virtual void Init() { }
+        public virtual void Initialize() { }
 
         public virtual void Release() { }
 

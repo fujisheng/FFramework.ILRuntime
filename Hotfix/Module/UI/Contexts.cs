@@ -27,7 +27,7 @@ namespace Framework.IL.Hotfix.Module.UI
         /// <summary>
         /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
         /// </summary>
-        public static void Init(IScriptManager scriptManager)
+        public static void Initialize(IScriptManager scriptManager)
         {
             foreach(var typeName in scriptManager.Types)
             {
@@ -40,7 +40,7 @@ namespace Framework.IL.Hotfix.Module.UI
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;
                     Debug.Log($"<color=blue>{type.FullName} is perloaded</color>");
-                    viewModel.Init();
+                    viewModel.Initialize();
                     viewModelCache.Add(type, viewModel);
                 }
             }
@@ -62,7 +62,7 @@ namespace Framework.IL.Hotfix.Module.UI
             if (!get)
             {
                 viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
-                viewModel.Init();
+                viewModel.Initialize();
                 viewModelCache.Add(viewModelType, viewModel);
             }
             return viewModel;

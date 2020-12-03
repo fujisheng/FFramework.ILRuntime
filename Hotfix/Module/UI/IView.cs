@@ -10,7 +10,7 @@ namespace Framework.IL.Hotfix.Module.UI
         Transform transform { get; }
 
         //View的生命周期
-        void Init();
+        void Initialize();
         void OnCreate(GameObject gameObject, Context context);
         UniTask Opening();
         void OnOpen(object param);

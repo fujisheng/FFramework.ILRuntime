@@ -2,7 +2,7 @@
 {
     public interface IViewModel
     {
-        void Init();
+        void Initialize();
         void Release();
     }
 
