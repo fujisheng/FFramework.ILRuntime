@@ -1,0 +1,22 @@
+{
+    "name": "com.fujisheng.fframework.il",
+    "displayName": "FFramework.ILRuntime",
+    "version": "1.0",
+    "unity": "2018.4",
+    "description": "this is unity framework",
+    "keywords": [
+      "unity",
+      "framework",
+      "ilruntime"
+    ],
+    "dependencies": {
+    },
+    "repository": {
+      "url": "https://github.com/fujisheng/FFramework.ILRuntime.git",
+      "type": "git",
+      "revision": "a470170b08a0bd5491c93a3784bcfe0ae73c4e0b"
+    },
+    "upmCi": {
+      "footprint": "7c92ced92f46f1a184e431971e901a0a066f70a3"
+    }
+  }
