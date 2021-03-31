@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using FInject;
 
 namespace Framework.Module.Script
 {
     public class EditorScriptManager : IScriptManager
     {
         Assembly assembly;
+
         IResourceLoader resourceLoader;
-        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
         readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
         readonly Dictionary<(string typeName, string methodName, int paramCount), MethodInfo> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), MethodInfo>();
@@ -48,16 +49,23 @@ namespace Framework.Module.Script
         }
 
         /// <summary>
+        /// 设置资源加载器
+        /// </summary>
+        /// <param name="resourceLoader">资源加载器</param>
+        [Inject]
+        public void SetResourceLoader(IResourceLoader resourceLoader)
+        {
+            this.resourceLoader = resourceLoader;
+        }
+
+        /// <summary>
         /// 加载dll
         /// </summary>
         /// <param name="label"></param>
         /// <returns></returns>
         public async UniTask Load(string label)
         {
-            resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
-
-            //LoadDll(frameworkDllNames);
             LoadDll(gameDllNames);
         }
 

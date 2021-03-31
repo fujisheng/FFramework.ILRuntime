@@ -12,8 +12,6 @@ namespace Framework.Module.Script.Editor
     public class ScriptsEditor : UnityEditor.Editor
     {
         private const string CodeDir = "Assets/Sources/Code/";
-        private const string FrameworkHotfixDll = "Framework.IL.Hotfix.dll";
-        private const string FrameworkHotfixPdb = "Framework.IL.Hotfix.pdb";
         private const string GameHotfixDll = "Game.Hotfix.dll";
         private const string GameHotfixPdb = "Game.Hotfix.pdb";
 
@@ -24,7 +22,6 @@ namespace Framework.Module.Script.Editor
 
         static void AssemblyCompilationFinishedCallback(string file, CompilerMessage[] messages)
         {
-            //CopyToSources(file, FrameworkHotfixDll, FrameworkHotfixPdb);
             CopyToSources(file, GameHotfixDll, GameHotfixPdb);
         }
 
@@ -48,7 +45,13 @@ namespace Framework.Module.Script.Editor
                 byte[] buffer = new byte[fsread.Length];
                 fsread.Read(buffer, 0, buffer.Length);
                 fsread.Close();
-                FileStream fsW = new FileStream(Path.Combine(CodeDir, $"{fileName}.bytes"), FileMode.Create);
+                var filePath = Path.Combine(CodeDir, $"{fileName}.bytes");
+
+                if (!File.Exists(filePath))
+                {
+                    File.Create(filePath);
+                }
+                FileStream fsW = new FileStream(filePath, FileMode.Create);
                 byte[] enctryptBytes = EncryptionUtility.AESEncrypt(buffer);
                 fsW.Write(enctryptBytes, 0, enctryptBytes.Length);
                 fsW.Flush();

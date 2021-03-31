@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using FInject;
 using Framework.IL.Module.Script;
 using Framework.Module.Resource;
 using Framework.Utility;
@@ -16,8 +17,6 @@ namespace Framework.Module.Script
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
-        (MemoryStream dll, MemoryStream pdb) frameworkStream;
-        readonly (string dll, string pdb) frameworkDllNames = ("Framework.IL.Hotfix.dll", "Framework.IL.Hotfix.pdb");
         (MemoryStream dll, MemoryStream pdb) gameStream;
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
         readonly Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
@@ -58,6 +57,16 @@ namespace Framework.Module.Script
         }
 
         /// <summary>
+        /// 设置资源加载器
+        /// </summary>
+        /// <param name="resourceLoader">资源加载器</param>
+        [Inject]
+        public void SetResourceLoader(IResourceLoader resourceLoader)
+        {
+            this.resourceLoader = resourceLoader;
+        }
+
+        /// <summary>
         /// 设置各种绑定器
         /// </summary>
         /// <param name="adpater"></param>
@@ -82,7 +91,6 @@ namespace Framework.Module.Script
             appdomain = new AppDomain();
             resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
-            //frameworkStream = LoadDll(frameworkDllNames);
             gameStream = LoadDll(gameDllNames);
             InitializeILRuntime();
         }
@@ -242,10 +250,7 @@ namespace Framework.Module.Script
             methodCache.Clear();
             gameStream.dll?.Close();
             gameStream.pdb?.Close();
-            frameworkStream.dll?.Close();
-            frameworkStream.pdb?.Close();
             gameStream = default;
-            frameworkStream = default;
             types = null;
         }
     }
