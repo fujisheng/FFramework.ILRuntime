@@ -1,7 +1,6 @@
-﻿using Framework.Module;
-using Framework.Module.Script;
+﻿using Framework.ILR.Module.Script;
 
-namespace Framework.IL.Utility
+namespace Framework.ILR.Utility
 {
     public class MethodInvoker
     {

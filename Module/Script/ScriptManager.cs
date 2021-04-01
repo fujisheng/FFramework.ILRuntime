@@ -1,6 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
 using FInject;
-using Framework.IL.Module.Script;
 using Framework.Module.Resource;
 using Framework.Utility;
 using ILRuntime.CLR.Method;
@@ -11,21 +10,18 @@ using System.IO;
 using UnityEngine;
 using AppDomain = ILRuntime.Runtime.Enviorment.AppDomain;
 
-namespace Framework.Module.Script
+namespace Framework.ILR.Module.Script
 {
     public class ScriptManager : IScriptManager
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
+        IILRuntimeReginster reginster;
+
         (MemoryStream dll, MemoryStream pdb) gameStream;
         readonly (string dll, string pdb) gameDllNames = ("Game.Hotfix.dll", "Game.Hotfix.pdb");
         readonly Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
         readonly Dictionary<(string typeName, string methodName, int paramCount), IMethod> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), IMethod>();
-
-        IAdpaterReginster adpaterReginster;
-        ICLRBinderReginster CLRBinderReginster;
-        IValueTypeBinderReginster valueTypeBinderReginster;
-        IDelegateConvertor delegateConvertor;
 
         static ScriptManager instance;
         public static ScriptManager Instance
@@ -69,16 +65,11 @@ namespace Framework.Module.Script
         /// <summary>
         /// 设置各种绑定器
         /// </summary>
-        /// <param name="adpater"></param>
-        /// <param name="clr"></param>
-        /// <param name="valueType"></param>
-        /// <param name="delegate"></param>
-        public void SetReginster(IAdpaterReginster adpater, ICLRBinderReginster clr, IValueTypeBinderReginster valueType, IDelegateConvertor @delegate)
+        /// <param name="reginster"></param>
+        [Inject]
+        public void SetReginster(IILRuntimeReginster reginster)
         {
-            adpaterReginster = adpater;
-            CLRBinderReginster = clr;
-            valueTypeBinderReginster = valueType;
-            delegateConvertor = @delegate;
+            this.reginster = reginster;
         }
 
         /// <summary>
@@ -89,7 +80,6 @@ namespace Framework.Module.Script
         public async UniTask Load(string label)
         {
             appdomain = new AppDomain();
-            resourceLoader = new ResourceLoader();
             await resourceLoader.PerloadAll<TextAsset>(label);
             gameStream = LoadDll(gameDllNames);
             InitializeILRuntime();
@@ -120,10 +110,7 @@ namespace Framework.Module.Script
             //由于Unity的Profiler接口只允许在主线程使用，为了避免出异常，需要告诉ILRuntime主线程的线程ID才能正确将函数运行耗时报告给Profiler
             appdomain.UnityMainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 #endif
-            adpaterReginster.Reginst(appdomain);
-            valueTypeBinderReginster.Reginst(appdomain);
-            delegateConvertor.Convert(appdomain);
-            CLRBinderReginster.Reginst(appdomain);
+            reginster.Reginster(appdomain);
         }
 
         IType GetOrCacheType(string typeName)

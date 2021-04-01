@@ -1,4 +1,4 @@
-﻿namespace Framework.IL.Hotfix.Module
+﻿namespace Framework.ILR.Module
 {
     public interface IModule
     {

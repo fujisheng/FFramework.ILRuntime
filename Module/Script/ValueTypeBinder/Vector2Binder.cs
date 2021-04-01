@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Framework.IL.ValueTypeBinder
+namespace Framework.ILR.Module.Script.ValueTypeBinder
 {
     public unsafe class Vector2Binder : ValueTypeBinder<Vector2>
     {

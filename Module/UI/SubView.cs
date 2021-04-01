@@ -1,6 +1,6 @@
 ﻿using Framework.Utility;
 
-namespace Framework.IL.Hotfix.Module.UI
+namespace Framework.ILR.Module.UI
 {
     public class SubView : View, ISubView
     {

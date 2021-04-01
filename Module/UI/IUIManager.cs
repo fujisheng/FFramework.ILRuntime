@@ -1,4 +1,4 @@
-﻿namespace Framework.IL.Hotfix.Module.UI
+﻿namespace Framework.ILR.Module.UI
 {
     public interface IUIManager
     {

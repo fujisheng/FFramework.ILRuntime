@@ -1,10 +1,10 @@
-﻿using Framework.Module.Resource;
-using Framework.Module.Script;
+﻿using Framework.ILR.Module.Script;
+using Framework.Module.Resource;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Framework.IL.Hotfix.Module.UI
+namespace Framework.ILR.Module.UI
 {
     public static class Contexts
     {

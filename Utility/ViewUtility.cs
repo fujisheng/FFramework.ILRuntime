@@ -1,10 +1,10 @@
-﻿using Framework.IL.Hotfix.Module.UI;
+﻿using Framework.ILR.Module.UI;
 using Framework.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-namespace Hotfix.Utility
+namespace Framework.ILR.Utility
 {
     public static class ViewUtility
     {

@@ -1,13 +1,13 @@
 ﻿using Cysharp.Threading.Tasks;
+using FInject;
 using Framework.Module.Resource;
 using Framework.Utility;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using FInject;
 
-namespace Framework.Module.Script
+namespace Framework.ILR.Module.Script
 {
     public class EditorScriptManager : IScriptManager
     {

@@ -1,9 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
+using Framework.ILR.Utility;
 using Framework.Module.Resource;
-using Hotfix.Utility;
 using UnityEngine;
 
-namespace Framework.IL.Hotfix.Module.UI
+namespace Framework.ILR.Module.UI
 {
     public abstract partial class View : IView
     {
@@ -14,6 +14,7 @@ namespace Framework.IL.Hotfix.Module.UI
         protected Context Context { get; private set; }
         protected IResourceLoader ResourceLoader { get; private set; }
 
+        public View() { }
         public virtual void Initialize(){}
 
         public void OnCreate(GameObject gameObject, Context context)

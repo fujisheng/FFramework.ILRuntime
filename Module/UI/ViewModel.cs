@@ -1,7 +1,4 @@
-﻿using Framework.Utility;
-using System.Collections.Generic;
-
-namespace Framework.IL.Hotfix.Module.UI
+﻿namespace Framework.ILR.Module.UI
 {
     public abstract class ViewModel : IViewModel
     {

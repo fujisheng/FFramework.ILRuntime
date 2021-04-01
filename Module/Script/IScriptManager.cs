@@ -1,7 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using Framework.Module.Resource;
 
-namespace Framework.Module.Script
+namespace Framework.ILR.Module.Script
 {
     public interface IScriptManager
     {

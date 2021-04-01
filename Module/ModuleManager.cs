@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Framework.IL.Hotfix.Module
+namespace Framework.ILR.Module
 {
     public static class ModuleManager
     {

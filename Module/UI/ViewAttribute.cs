@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Framework.IL.Hotfix.Module.UI
+namespace Framework.ILR.Module.UI
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class Bind : Attribute
