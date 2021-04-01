@@ -1,4 +1,5 @@
-﻿using Framework.ILR.Module.Script;
+﻿using FInject;
+using Framework.ILR.Module.Script;
 using Framework.Module.Resource;
 using System;
 using System.Collections.Generic;
@@ -159,7 +160,7 @@ namespace Framework.ILR.Module.UI
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
             var view = Activator.CreateInstance(viewType) as IView;
-            var context = new Context(viewModel, view, new ResourceLoader(), GetBindInfo(viewType));
+            var context = new Context(viewModel, view, Injecter.CreateInstance<ResourceLoader>(), GetBindInfo(viewType));
             return context;
         }
 
