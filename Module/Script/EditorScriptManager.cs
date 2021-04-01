@@ -21,7 +21,7 @@ namespace Framework.ILR.Module.Script
         static EditorScriptManager instance;
         public static EditorScriptManager Instance
         {
-            get { return instance ?? (instance = new EditorScriptManager()); }
+            get { return instance ?? (instance = Injecter.CreateInstance<EditorScriptManager>()); }
         }
 
         string[] types;

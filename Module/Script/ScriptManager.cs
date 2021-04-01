@@ -26,7 +26,7 @@ namespace Framework.ILR.Module.Script
         static ScriptManager instance;
         public static ScriptManager Instance
         {
-            get { return instance ?? (instance = new ScriptManager()); }
+            get { return instance ?? (instance = Injecter.CreateInstance<ScriptManager>()); }
         }
 
         string[] types;
