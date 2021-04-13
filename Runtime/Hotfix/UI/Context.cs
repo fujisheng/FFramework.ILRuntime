@@ -218,17 +218,7 @@ namespace Framework.ILR.Module.UI
             for(int i = 0; i < methodInfos.Length; i++)
             {
                 var methodInfo = methodInfos[i];
-                BindProperty bindInfo = null;
-                var attributes = methodInfo.GetCustomAttributes(true);
-                for(int j = 0; j < attributes.Length; j++)
-                {
-                    var attribute = attributes[j];
-                    if (attribute is BindProperty)
-                    {
-                        bindInfo = attribute as BindProperty;
-                        break;
-                    }
-                }
+                var bindInfo = methodInfo.GetCustomAttribute<BindProperty>(true);
 
                 if(bindInfo == null)
                 {
