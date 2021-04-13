@@ -29,11 +29,18 @@ namespace Framework.ILR.Module.UI
             view.Initialize();
         }
 
+        /// <summary>
+        /// 释放这个Context
+        /// </summary>
         public void Release()
         {
             Debug.Log("Releasesssssssssssssssssssssssssssssssssssssssssssssss");
         }
 
+        /// <summary>
+        /// 创建View
+        /// </summary>
+        /// <returns></returns>
         public async UniTask<IView> CreateView()
         {
             var assetName = bindInfo.assetName ?? View.ViewName;
@@ -43,6 +50,11 @@ namespace Framework.ILR.Module.UI
             return View;
         }
 
+        /// <summary>
+        /// 展示View
+        /// </summary>
+        /// <param name="param">参数</param>
+        /// <returns></returns>
         public async UniTask ShowView(object param)
         {
             View.gameObject.SetActive(true);
@@ -55,6 +67,11 @@ namespace Framework.ILR.Module.UI
             }
         }
 
+        /// <summary>
+        /// 隐藏View
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async UniTask HideView(object param)
         {
             View.gameObject.SetActive(false);
@@ -62,7 +79,11 @@ namespace Framework.ILR.Module.UI
             View.OnClose(param);
         }
 
-        //获取所有的BindableProperty
+        /// <summary>
+        /// 获取所有的BindableProperty
+        /// </summary>
+        /// <param name="withCached">是否缓存</param>
+        /// <returns></returns>
         List<(string propertyName, IBindableProperty property)> GetPropertys(bool withCached = true)
         {
             if(ViewModel == null)
@@ -101,7 +122,11 @@ namespace Framework.ILR.Module.UI
             return result;
         }
 
-        //获取某个特定的属性 当缓存中有的时候就直接拿出来  没有的话就通过反射获取
+        /// <summary>
+        /// 获取某个特定的属性 当缓存中有的时候就直接拿出来  没有的话就通过反射获取
+        /// </summary>
+        /// <param name="propertyName">属性的名字</param>
+        /// <returns></returns>
         IBindableProperty GetProperty(string propertyName)
         {
             bool get = propertyCache.TryGetValue(propertyName, out IBindableProperty field);
@@ -127,7 +152,12 @@ namespace Framework.ILR.Module.UI
             return field;
         }
 
-        //通过指定类型和名字获取对应的属性
+        /// <summary>
+        /// 通过指定类型和名字获取对应的属性
+        /// </summary>
+        /// <typeparam name="T">属性值的类型</typeparam>
+        /// <param name="propertyName">属性的名字</param>
+        /// <returns></returns>
         BindableProperty<T> GetProperty<T>(string propertyName)
         {
             var property = GetProperty(propertyName);

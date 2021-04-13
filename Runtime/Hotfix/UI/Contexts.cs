@@ -1,5 +1,6 @@
 ﻿using FInject;
 using Framework.ILR.Module.Script;
+using Framework.ILR.Utility;
 using Framework.Module.Resource;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,7 @@ namespace Framework.ILR.Module.UI
     public static class Contexts
     {
         static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
-        static Dictionary<string, Type> viewModelTypeCache = new Dictionary<string, Type>();
         static Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)> bindInfoCache = new Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)>();
-
-        static bool Is<T>(Type type)
-        {
-            try
-            {
-                return typeof(T).IsAssignableFrom(type);
-            }
-            catch
-            {
-                return false;
-            }
-        }
 
         /// <summary>
         /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
@@ -37,7 +25,7 @@ namespace Framework.ILR.Module.UI
                 {
                     continue;
                 }
-                if (Is<IViewModel>(type) && Is<IPerloadViewModel>(type) && !type.IsAbstract && type.IsClass)
+                if (type.Is<IViewModel>() && type.Is<IPerloadViewModel>() && !type.IsAbstract && type.IsClass)
                 {
                     var viewModel = Activator.CreateInstance(type) as IViewModel;
                     Debug.Log($"<color=blue>{type.FullName} is perloaded</color>");
@@ -54,7 +42,7 @@ namespace Framework.ILR.Module.UI
         /// <returns></returns>
         public static IViewModel GetViewModel(Type viewModelType)
         {
-            if (!Is<IViewModel>(viewModelType))
+            if (!viewModelType.Is<IViewModel>())
             {
                 throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
             }
@@ -78,23 +66,6 @@ namespace Framework.ILR.Module.UI
         {
             return GetViewModel(typeof(TViewModel));
         }
-
-        static Type GetViewModelType(string viewModelName)
-        {
-            bool get = viewModelTypeCache.TryGetValue(viewModelName, out Type type);
-            if (get)
-            {
-                return type;
-            }
-            type = Type.GetType(viewModelName);
-            if(type == null)
-            {
-                return null;
-            }
-            viewModelTypeCache.Add(viewModelName, type);
-            return type;
-        }
-
         
         /// <summary>
         /// 获取Bind信息
@@ -103,7 +74,7 @@ namespace Framework.ILR.Module.UI
         /// <returns></returns>
         public static (Type viewModelType, string assetName, int layer, int flag) GetBindInfo(Type viewType)
         {
-            if (!Is<IView>(viewType))
+            if (!viewType.Is<IView>())
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
@@ -113,27 +84,22 @@ namespace Framework.ILR.Module.UI
             {
                 return bindInfo;
             }
-            var attributes = viewType.GetCustomAttributes(true);
-            for (int j = 0; j < attributes.Length; j++)
-            {
-                var attribute = attributes[j];
-                if (!(attribute is Bind))
-                {
-                    continue;
-                }
 
-                var bind = attribute as Bind;
-                //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
-                var viewModelType = GetViewModelType(bind.ViewModelType.ToString());
-                if (!Is<IViewModel>(viewModelType))
-                {
-                    throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
-                }
-                bindInfo = (viewModelType, bind.AssetName, bind.Layer, bind.Flag);
-                bindInfoCache.Add(viewType, bindInfo);
-                return bindInfo;
+            var bind = viewType.GetCustomAttribute<Bind>(true);
+            if(bind == null)
+            {
+                throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");
             }
-            throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");
+
+            //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
+            var viewModelType = TypeUtility.GetType(bind.ViewModelType.ToString());
+            if (!viewModelType.Is<IViewModel>())
+            {
+                throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
+            }
+            bindInfo = (viewModelType, bind.AssetName, bind.Layer, bind.Flag);
+            bindInfoCache.Add(viewType, bindInfo);
+            return bindInfo;
         }
 
         /// <summary>
@@ -155,7 +121,7 @@ namespace Framework.ILR.Module.UI
         public static Context Create(Type viewModelType, Type viewType)
         {
             var viewModel = GetViewModel(viewModelType);
-            if (!Is<IView>(viewType))
+            if (!viewType.Is<IView>())
             {
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
