@@ -22,7 +22,7 @@ namespace Framework.Module.Script.Editor
                 Directory.CreateDirectory("Assets/Editor Default Resources/");
             }
 
-            var setting = new FrameworkILRuntimeEditorSetting();
+            var setting = CreateInstance<FrameworkILRuntimeEditorSetting>();
             AssetDatabase.CreateAsset(setting, "Assets/Editor Default Resources/FrameworkILRuntimeEditorSetting.asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
