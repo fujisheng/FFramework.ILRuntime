@@ -1,7 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     public interface IView
     {

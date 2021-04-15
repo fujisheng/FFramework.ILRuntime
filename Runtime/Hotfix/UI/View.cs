@@ -1,9 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
 using Framework.ILR.Utility;
-using Framework.Module.Resource;
+using Framework.Service.Resource;
 using UnityEngine;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     public abstract partial class View : IView
     {

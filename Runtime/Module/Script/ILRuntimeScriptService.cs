@@ -1,7 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using FInject;
-using Framework.Module.Resource;
-using Framework.Utility;
+using Framework.Service.Resource;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.TypeSystem;
 using ILRuntime.Mono.Cecil.Pdb;
@@ -10,9 +9,9 @@ using System.IO;
 using UnityEngine;
 using AppDomain = ILRuntime.Runtime.Enviorment.AppDomain;
 
-namespace Framework.ILR.Module.Script
+namespace Framework.ILR.Service.Script
 {
-    public class ScriptManager : IScriptManager
+    public class ILRuntimeScriptService : IScriptService
     {
         public AppDomain appdomain { get; private set; }
         IResourceLoader resourceLoader;
@@ -23,10 +22,10 @@ namespace Framework.ILR.Module.Script
         readonly Dictionary<string, IType> typeCache = new Dictionary<string, IType>();
         readonly Dictionary<(string typeName, string methodName, int paramCount), IMethod> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), IMethod>();
 
-        static ScriptManager instance;
-        public static ScriptManager Instance
+        static ILRuntimeScriptService instance;
+        public static ILRuntimeScriptService Instance
         {
-            get { return instance ?? (instance = Injecter.CreateInstance<ScriptManager>()); }
+            get { return instance ?? (instance = Injecter.CreateInstance<ILRuntimeScriptService>()); }
         }
 
         string[] types;
@@ -88,10 +87,10 @@ namespace Framework.ILR.Module.Script
         (MemoryStream dllStream, MemoryStream pdbStream) LoadDll((string dllName, string pdbName) names)
         {
             TextAsset dllAsset = resourceLoader.Get<TextAsset>(names.dllName);
-            var dllStream = new MemoryStream(EncryptionUtility.AESDecrypt(dllAsset.bytes));
+            var dllStream = new MemoryStream(Framework.Utility.Encryption.AESDecrypt(dllAsset.bytes));
 #if DEBUG || UNITY_EDITOR
             TextAsset pdbAsset = resourceLoader.Get<TextAsset>(names.pdbName);
-            var pdbStream = new MemoryStream(EncryptionUtility.AESDecrypt(pdbAsset.bytes));
+            var pdbStream = new MemoryStream(Framework.Utility.Encryption.AESDecrypt(pdbAsset.bytes));
 
             appdomain.LoadAssembly(dllStream, pdbStream, new PdbReaderProvider());
             return (dllStream, pdbStream);

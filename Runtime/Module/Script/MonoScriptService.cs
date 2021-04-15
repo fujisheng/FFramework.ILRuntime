@@ -1,15 +1,14 @@
 ﻿using Cysharp.Threading.Tasks;
 using FInject;
-using Framework.Module.Resource;
-using Framework.Utility;
+using Framework.Service.Resource;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Framework.ILR.Module.Script
+namespace Framework.ILR.Service.Script
 {
-    public class EditorScriptManager : IScriptManager
+    public class MonoScriptService : IScriptService
     {
         Assembly assembly;
 
@@ -18,10 +17,10 @@ namespace Framework.ILR.Module.Script
         readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
         readonly Dictionary<(string typeName, string methodName, int paramCount), MethodInfo> methodCache = new Dictionary<(string typeName, string methodName, int paramCount), MethodInfo>();
 
-        static EditorScriptManager instance;
-        public static EditorScriptManager Instance
+        static MonoScriptService instance;
+        public static MonoScriptService Instance
         {
-            get { return instance ?? (instance = Injecter.CreateInstance<EditorScriptManager>()); }
+            get { return instance ?? (instance = Injecter.CreateInstance<MonoScriptService>()); }
         }
 
         string[] types;
@@ -72,10 +71,10 @@ namespace Framework.ILR.Module.Script
         void LoadDll((string dll, string pdb) names)
         {
             TextAsset dllAsset = resourceLoader.Get<TextAsset>(names.dll);
-            var dllBytes = EncryptionUtility.AESDecrypt(dllAsset.bytes);
+            var dllBytes = Framework.Utility.Encryption.AESDecrypt(dllAsset.bytes);
 #if DEBUG || UNITY_EDITOR
             TextAsset pdbAsset = resourceLoader.Get<TextAsset>(names.pdb);
-            var pdbBytes = EncryptionUtility.AESDecrypt(pdbAsset.bytes);
+            var pdbBytes = Framework.Utility.Encryption.AESDecrypt(pdbAsset.bytes);
 
             assembly = Assembly.Load(dllBytes, pdbBytes);
 #else

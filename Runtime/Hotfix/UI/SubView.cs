@@ -1,6 +1,4 @@
-﻿using Framework.Utility;
-
-namespace Framework.ILR.Module.UI
+﻿namespace Framework.ILR.Service.UI
 {
     public class SubView : View, ISubView
     {
@@ -9,7 +7,7 @@ namespace Framework.ILR.Module.UI
         protected void SendMessageToRoot(string message, object args)
         {
             string parentTypeName = parentView.GetType().FullName;
-            string functionName = StringUtility.GetOrAttach("OnSubMessage_", message);
+            string functionName = Framework.Utility.String.GetOrCombine("OnSubMessage_", message);
             //MethodInvoker.Invoke(parentTypeName, functionName, parentView, args);
         }
     }

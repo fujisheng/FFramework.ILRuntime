@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Framework.ILR.Module.Script.ValueTypeBinder
+namespace Framework.ILR.Service.Script.ValueTypeBinder
 {
     public unsafe class QuaternionBinder : ValueTypeBinder<Quaternion>
     {

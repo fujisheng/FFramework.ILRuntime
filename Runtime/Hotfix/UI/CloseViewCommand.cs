@@ -1,7 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
-using Framework.Utility;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     class CloseViewCommand : ICommand
     {

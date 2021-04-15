@@ -1,12 +1,12 @@
 ﻿using FInject;
-using Framework.ILR.Module.Script;
+using Framework.ILR.Service.Script;
 using Framework.ILR.Utility;
-using Framework.Module.Resource;
+using Framework.Service.Resource;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     public static class Contexts
     {
@@ -16,7 +16,7 @@ namespace Framework.ILR.Module.UI
         /// <summary>
         /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
         /// </summary>
-        public static void Initialize(IScriptManager scriptManager)
+        public static void Initialize(IScriptService scriptManager)
         {
             foreach(var typeName in scriptManager.Types)
             {

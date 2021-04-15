@@ -1,6 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     class OpenViewCommand : ICommand
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     //标记接口
     public interface IBindableProperty{}

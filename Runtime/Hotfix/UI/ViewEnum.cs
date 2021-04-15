@@ -1,4 +1,4 @@
-﻿namespace Framework.ILR.Module.UI
+﻿namespace Framework.ILR.Service.UI
 {
     public static class Layer
     {

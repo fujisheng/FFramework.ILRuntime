@@ -4,7 +4,7 @@ using ILRuntime.CLR.Method;
 using ILRuntime.Runtime.Enviorment;
 using ILRuntime.Runtime.Intepreter;
 
-namespace Framework.ILR.Module.Script.Adaptor
+namespace Framework.ILR.Service.Script.Adaptor
 {
 	/// <summary>
 	/// 用于async await适配

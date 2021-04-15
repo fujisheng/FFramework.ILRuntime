@@ -1,5 +1,4 @@
-﻿using Framework.ILR.Module.UI;
-using Framework.Utility;
+﻿using Framework.ILR.Service.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -19,7 +18,7 @@ namespace Framework.ILR.Utility
                 foreach(var button in allButton)
                 {
                     string buttonName = button.name.Replace("@", "").Replace("(Clone)", "");
-                    string functionName = StringUtility.GetOrAttach("OnClick_", buttonName);
+                    string functionName = Framework.Utility.String.GetOrCombine("OnClick_", buttonName);
 
                     button.onClick.AddListener(() =>
                     {

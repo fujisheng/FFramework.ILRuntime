@@ -1,11 +1,11 @@
-﻿using Framework.ILR.Module.Script;
+﻿using Framework.ILR.Service.Script;
 
 namespace Framework.ILR.Utility
 {
     public class MethodInvoker
     {
-        static IScriptManager scriptManager;
-        static IScriptManager ScriptManager { get { return scriptManager; } }//?? (scriptManager = ModuleManager.GetModule<IScriptManager>()); } }
+        static IScriptService scriptManager;
+        static IScriptService ScriptManager { get { return scriptManager; } }//?? (scriptManager = ModuleManager.GetModule<IScriptManager>()); } }
 
         public static object Invoke(string typeName, string methodName, object owner = null, params object[] args)
         {

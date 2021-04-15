@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class Bind : Attribute

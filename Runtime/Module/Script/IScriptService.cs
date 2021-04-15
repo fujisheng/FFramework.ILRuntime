@@ -1,9 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
-using Framework.Module.Resource;
+using Framework.Service.Resource;
 
-namespace Framework.ILR.Module.Script
+namespace Framework.ILR.Service.Script
 {
-    public interface IScriptManager
+    public interface IScriptService
     {
         string[] Types { get; }
         void SetResourceLoader(IResourceLoader resourceLoader);

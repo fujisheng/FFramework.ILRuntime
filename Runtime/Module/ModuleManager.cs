@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Framework.ILR.Module
+namespace Framework.ILR.Service
 {
     public static class ModuleManager
     {

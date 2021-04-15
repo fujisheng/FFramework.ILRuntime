@@ -1,13 +1,12 @@
 ﻿using Cysharp.Threading.Tasks;
-using Framework.Module.Resource;
-using Framework.Utility;
+using Framework.Service.Resource;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     public class Context
     {
@@ -60,7 +59,7 @@ namespace Framework.ILR.Module.UI
             View.gameObject.SetActive(true);
             await View.Opening();
             View.OnOpen(param);
-            var methodInfo = ViewModel.GetType().GetMethod(StringUtility.GetOrAttach("OnOpen_", View.ViewName));
+            var methodInfo = ViewModel.GetType().GetMethod(Framework.Utility.String.GetOrCombine("OnOpen_", View.ViewName));
             if (methodInfo != null)
             {
                 methodInfo.Invoke(ViewModel, new object[] { param });
@@ -180,7 +179,7 @@ namespace Framework.ILR.Module.UI
             {
                 var property = propertys[i];
                 var addMethodInfo = property.property.GetType().GetMethod("AddListener", flags);
-                string listenerMethodName = StringUtility.GetOrAttach("OnChanged_", property.propertyName);
+                string listenerMethodName = Framework.Utility.String.GetOrCombine("OnChanged_", property.propertyName);
                 var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName, flags);
                 if(addMethodInfo == null || listenerMethodInfo == null)
                 {

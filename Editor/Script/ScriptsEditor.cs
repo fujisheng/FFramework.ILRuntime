@@ -1,10 +1,8 @@
-﻿using Framework.Utility;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEditor.Compilation;
-using UnityEngine;
 
-namespace Framework.Module.Script.Editor
+namespace Framework.ILR.Service.Script.Editor
 {
     [InitializeOnLoad]
     public class ScriptsEditor : UnityEditor.Editor
@@ -34,7 +32,7 @@ namespace Framework.Module.Script.Editor
             var setting = EditorGUIUtility.Load("FrameworkILRuntimeEditorSetting.asset") as FrameworkILRuntimeEditorSetting;
             if (setting == null)
             {
-                Debug.LogWarning("FrameworkILRuntimeEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
+                UnityEngine.Debug.LogWarning("FrameworkILRuntimeEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
                 return;
             }
 
@@ -47,7 +45,7 @@ namespace Framework.Module.Script.Editor
             var setting = EditorGUIUtility.Load("FrameworkILRuntimeEditorSetting.asset") as FrameworkILRuntimeEditorSetting;
             if(setting == null)
             {
-                Debug.LogWarning("FrameworkILRuntimeEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
+                UnityEngine.Debug.LogWarning("FrameworkILRuntimeEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
                 return;
             }
             CopyToSources(file, setting.DllName, setting.PdbName, setting.CodeSourcesPath);
@@ -81,7 +79,7 @@ namespace Framework.Module.Script.Editor
                     fscreate.Close();
                 }
                 FileStream fsW = new FileStream(filePath, FileMode.Create);
-                byte[] enctryptBytes = EncryptionUtility.AESEncrypt(buffer);
+                byte[] enctryptBytes = Utility.Encryption.AESEncrypt(buffer);
                 fsW.Write(enctryptBytes, 0, enctryptBytes.Length);
                 fsW.Flush();
                 fsW.Close();

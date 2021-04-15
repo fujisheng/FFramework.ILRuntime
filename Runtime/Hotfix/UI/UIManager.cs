@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Framework.ILR.Module.UI
+namespace Framework.ILR.Service.UI
 {
     //public class UIManager : ModuleBase, IUIManager
     //{

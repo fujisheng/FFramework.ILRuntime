@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Framework.Module.Script.Editor
+namespace Framework.ILR.Service.Script.Editor
 {
     public class FrameworkILRuntimeEditorSetting : ScriptableObject
     {

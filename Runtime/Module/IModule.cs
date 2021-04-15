@@ -1,4 +1,4 @@
-﻿namespace Framework.ILR.Module
+﻿namespace Framework.ILR.Service
 {
     public interface IModule
     {

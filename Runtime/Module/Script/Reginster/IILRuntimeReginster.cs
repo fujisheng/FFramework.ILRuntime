@@ -1,6 +1,6 @@
 ﻿using ILRuntime.Runtime.Enviorment;
 
-namespace Framework.ILR.Module.Script
+namespace Framework.ILR.Service.Script
 {
     public interface IILRuntimeReginster
     {
