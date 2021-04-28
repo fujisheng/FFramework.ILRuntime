@@ -85,7 +85,7 @@ namespace Framework.ILR.Service.UI
                 return bindInfo;
             }
 
-            var bind = TypeUtility.GetCustomAttribute<Bind>(viewType, true);
+            var bind = viewType.GetHotfixCustomAttribute<Bind>(true);
             if(bind == null)
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");

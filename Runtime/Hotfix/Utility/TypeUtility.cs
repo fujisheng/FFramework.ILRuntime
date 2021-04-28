@@ -33,7 +33,7 @@ namespace Framework.ILR.Utility
         /// <param name="type">类型</param>
         /// <param name="inherit">是否获取继承的特性</param>
         /// <returns></returns>
-        public static T GetCustomAttribute<T>(MemberInfo memberInfo, bool inherit = true) where T : Attribute
+        public static T GetHotfixCustomAttribute<T>(this MemberInfo memberInfo, bool inherit = true) where T : Attribute
         {
             var attributes = memberInfo.GetCustomAttributes(inherit);
             for (int j = 0; j < attributes.Length; j++)

@@ -218,7 +218,7 @@ namespace Framework.ILR.Service.UI
             for(int i = 0; i < methodInfos.Length; i++)
             {
                 var methodInfo = methodInfos[i];
-                var bindInfo = TypeUtility.GetCustomAttribute<BindProperty>(methodInfo, true);
+                var bindInfo = methodInfo.GetHotfixCustomAttribute<BindProperty>(true);
 
                 if(bindInfo == null)
                 {
