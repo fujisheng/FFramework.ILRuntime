@@ -79,6 +79,7 @@ namespace Framework.ILR.Service.Script
         public async UniTask Load(string label)
         {
             appdomain = new AppDomain();
+            appdomain.EnableRegisterVM = true;
             await resourceLoader.PerloadAll<TextAsset>(label);
             gameStream = LoadDll(gameDllNames);
             InitializeILRuntime();
@@ -110,7 +111,6 @@ namespace Framework.ILR.Service.Script
             appdomain.UnityMainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 #endif
             reginster.Reginster(appdomain);
-            appdomain.EnableRegisterVM = true;
         }
 
         IType GetOrCacheType(string typeName)
