@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using Framework.ILR.Utility;
 using Framework.Service.Resource;
 using System;
 using System.Collections.Generic;
@@ -217,7 +218,7 @@ namespace Framework.ILR.Service.UI
             for(int i = 0; i < methodInfos.Length; i++)
             {
                 var methodInfo = methodInfos[i];
-                var bindInfo = methodInfo.GetCustomAttribute<BindProperty>(true);
+                var bindInfo = TypeUtility.GetCustomAttribute<BindProperty>(methodInfo, true);
 
                 if(bindInfo == null)
                 {
