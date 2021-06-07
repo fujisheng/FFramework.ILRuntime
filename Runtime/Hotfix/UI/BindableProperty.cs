@@ -4,59 +4,41 @@ using System.Reflection;
 
 namespace Framework.ILR.Service.UI
 {
-    //标记接口
+    /// <summary>
+    /// 可绑定属性标记接口
+    /// </summary>
     public interface IBindableProperty{}
 
     /// <summary>
-    /// 值为int的BindableProperty
+    /// 可绑定的属性
     /// </summary>
-    public class IntBp : BindableProperty<int> { public IntBp(int value = 0) : base(value) { } }
-
-    /// <summary>
-    /// 值为long的BindableProperty
-    /// </summary>
-    public class LongBp : BindableProperty<long> { public LongBp(long value = 0l) : base(value) { } }
-
-    /// <summary>
-    /// 值为float的BindableProperty
-    /// </summary>
-    public class FloatBp : BindableProperty<float> { public FloatBp(float value = 0f) : base(value) { } }
-
-    /// <summary>
-    /// 值为double的BindableProperty
-    /// </summary>
-    public class DoubleBp : BindableProperty<double> { public DoubleBp(double value = 0d) : base(value) { } }
-
-    /// <summary>
-    /// 值为string的BindableProperty
-    /// </summary>
-    public class StringBp : BindableProperty<string> { public StringBp(string value = null) : base(value) { } }
-
-    /// <summary>
-    /// BinableProperty的简写
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class Bp<T> : BindableProperty<T>{ public Bp(T v = default) : base(v) { } }
-
-    //可绑定的属性
-    public class BindableProperty<T> : IBindableProperty
+    /// <typeparam name="T">值的类型</typeparam>
+    public struct BindableProperty<T> : IBindableProperty
     {
         T newValue;
         T oldValue;
         List<Action<T, T>> actions;
         List<(object owner, MethodInfo methodInfo)> methodInfos;
 
-        public BindableProperty()
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="value">值</param>
+        public BindableProperty(T value = default)
         {
+            newValue = value;
+            oldValue = default(T);
             actions = new List<Action<T, T>>();
             methodInfos = new List<(object owner, MethodInfo methodInfo)>();
         }
 
-        public BindableProperty(T value = default)
+        /// <summary>
+        /// 将某个值隐式转换成可绑定属性
+        /// </summary>
+        /// <param name="value">值</param>
+        public static implicit operator BindableProperty<T>(T value)
         {
-            actions = new List<Action<T, T>>();
-            methodInfos = new List<(object owner, MethodInfo methodInfo)>();
-            newValue = value;
+            return new BindableProperty<T>(value);
         }
 
         /// <summary>

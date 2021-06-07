@@ -85,17 +85,17 @@ namespace Framework.ILR.Service.UI
                 return bindInfo;
             }
 
-            var bind = viewType.GetHotfixCustomAttribute<Bind>(true);
+            var bind = viewType.GetHotfixCustomAttribute<BindingAttribute>(true);
             if(bind == null)
             {
-                throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(Bind).FullName}]");
+                throw new Exception($"get bind info failure, {viewType.FullName} dont have attribute [{typeof(BindingAttribute).FullName}]");
             }
 
             //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
             var viewModelType = TypeUtility.GetType(bind.ViewModelType.ToString());
             if (!viewModelType.Is<IViewModel>())
             {
-                throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(Bind).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
+                throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(BindingAttribute).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
             }
             bindInfo = (viewModelType, bind.AssetName, bind.Layer, bind.Flag);
             bindInfoCache.Add(viewType, bindInfo);
