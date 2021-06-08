@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Framework.ILR.Service.UI
 {
-    public class Context
+    public struct Context
     {
         internal IViewModel ViewModel { get; private set; }
         internal IView View { get; private set; }
@@ -17,7 +17,7 @@ namespace Framework.ILR.Service.UI
 
         Dictionary<string, IBindableProperty> propertyCache;
         (Type viewModelType, string assetName, int layer, int flag) bindInfo;
-        BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
+        static BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
 
         internal Context(IViewModel viewModel, IView view, IResourceLoader loader, (Type viewModelType, string assetName, int layer, int flag) bindInfo)
         {
