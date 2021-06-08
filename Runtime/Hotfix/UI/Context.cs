@@ -80,54 +80,11 @@ namespace Framework.ILR.Service.UI
         }
 
         /// <summary>
-        /// 获取所有的BindableProperty
-        /// </summary>
-        /// <param name="withCached">是否缓存</param>
-        /// <returns></returns>
-        List<(string propertyName, IBindableProperty property)> GetPropertys(bool withCached = true)
-        {
-            if(ViewModel == null)
-            {
-                throw new Exception($"can not get propertys, please bind viewModel first");
-            }
-
-            var fieldInfos = ViewModel.GetType().GetFields(flags);
-            if(fieldInfos == null)
-            {
-                return null;
-            }
-
-            List<(string propertyName, IBindableProperty property)> result = new List<(string propertyName, IBindableProperty property)>();
-
-            for (int i = 0; i < fieldInfos.Length; i++)
-            {
-                var fieldInfo = fieldInfos[i];
-                bool get = propertyCache.TryGetValue(fieldInfo.Name, out IBindableProperty field);
-                if (!get)
-                {
-                    if (fieldInfo == null || !typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
-                    {
-                        continue;
-                    }
-
-                    field = fieldInfo.GetValue(ViewModel) as IBindableProperty;
-                    propertyCache.Add(fieldInfo.Name, field);
-                    result.Add((fieldInfo.Name, field));
-                }
-                else if(withCached)
-                {
-                    result.Add((fieldInfo.Name, field));
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
         /// 获取某个特定的属性 当缓存中有的时候就直接拿出来  没有的话就通过反射获取
         /// </summary>
         /// <param name="propertyName">属性的名字</param>
         /// <returns></returns>
-        IBindableProperty GetProperty(string propertyName)
+        IBindableProperty GetBindableProperty(string propertyName)
         {
             bool get = propertyCache.TryGetValue(propertyName, out IBindableProperty field);
             if (!get)
@@ -158,9 +115,9 @@ namespace Framework.ILR.Service.UI
         /// <typeparam name="T">属性值的类型</typeparam>
         /// <param name="propertyName">属性的名字</param>
         /// <returns></returns>
-        BindableProperty<T> GetProperty<T>(string propertyName)
+        BindableProperty<T> GetBindableProperty<T>(string propertyName)
         {
-            var property = GetProperty(propertyName);
+            var property = GetBindableProperty(propertyName);
             if(!(property is BindableProperty<T>))
             {
                 throw new Exception($"{propertyName} is {property.GetType().FullName} not {typeof(BindableProperty<T>)}");
@@ -169,45 +126,22 @@ namespace Framework.ILR.Service.UI
         }
 
         /// <summary>
-        /// 一键绑定所有的Property
-        /// </summary>
-        /// <param name="bindView">是否绑定View</param>
-        /// <param name="bindAlreadyBinded">是否绑定已经绑定的 请注意如果已经绑定过的再绑定到同一个listener的话 每次改变这个listener将会执行多次</param>
-        public void BindPropertys(object target, bool withAlreadyBinded = false)
-        {
-            var propertys = GetPropertys(withAlreadyBinded);
-            for(int i = 0; i < propertys.Count; i++)
-            {
-                var property = propertys[i];
-                var addMethodInfo = property.property.GetType().GetMethod("AddListener", flags);
-                string listenerMethodName = Framework.Utility.String.GetOrCombine("OnChanged_", property.propertyName);
-                var listenerMethodInfo = target.GetType().GetMethod(listenerMethodName, flags);
-                if(addMethodInfo == null || listenerMethodInfo == null)
-                {
-                    continue;
-                }
-
-                addMethodInfo.Invoke(property.property, new object[] {target, listenerMethodInfo});
-            }
-        }
-
-        /// <summary>
         /// 手动绑定一个方法 需要手动移除绑定
         /// </summary>
         /// <typeparam name="T">这个属性的值的类型</typeparam>
         /// <param name="propertyName">对应ViewModel中的BindableProperty的名字</param>
         /// <param name="listener">对应的OnChanged方法</param>
-        public void Bind<T>(string propertyName, Action<T, T> listener)
+        public void Binding<T>(string propertyName, Action<T, T> listener)
         {
-            var property = GetProperty<T>(propertyName);
+            var property = GetBindableProperty<T>(propertyName);
             property.AddListener(listener);
         }
 
         /// <summary>
-        /// 通过BindProperty这个特性来绑定对应的Property到某个方法
+        /// 通过OnValueChanged这个特性来绑定对应的Property到某个方法
         /// </summary>
         /// <param name="target">要绑定的目标</param>
-        public void BindWithAttribute(object target)
+        public void BindingWithAttribute(object target)
         {
             var methodInfos = target.GetType().GetMethods(flags);
             if(methodInfos == null)
@@ -218,13 +152,13 @@ namespace Framework.ILR.Service.UI
             for(int i = 0; i < methodInfos.Length; i++)
             {
                 var methodInfo = methodInfos[i];
-                var bindInfo = methodInfo.GetHotfixCustomAttribute<BindingPropertyAttribute>(true);
+                var bindInfo = methodInfo.GetHotfixCustomAttribute<OnValueChangedAttribute>(true);
 
                 if(bindInfo == null)
                 {
                     continue;
                 }
-                var property = GetProperty(bindInfo.PropertyName);
+                var property = GetBindableProperty(bindInfo.PropertyName);
                 var addMethodInfo = property.GetType().GetMethod("AddListener", flags, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
                 if (addMethodInfo == null)
                 {
@@ -243,7 +177,7 @@ namespace Framework.ILR.Service.UI
         /// <param name="listener">对应的OnChanged方法</param>
         public void Unbind<T>(string propertyName, Action<T, T> listener)
         {
-            var property = GetProperty<T>(propertyName);
+            var property = GetBindableProperty<T>(propertyName);
             property.RemoveListener(listener);
         }
 
@@ -254,9 +188,9 @@ namespace Framework.ILR.Service.UI
         /// <param name="propertyName">对应ViewModel中的BindableProperty的名字</param>
         /// <param name="value">值</param>
         /// <param name="force">是否强制触发Listener而无论是否和上次的值一样</param>
-        public void SetValue<T>(string propertyName, T value, bool force = false)
+        public void SetProperty<T>(string propertyName, T value, bool force = false)
         {
-            var property = GetProperty<T>(propertyName);
+            var property = GetBindableProperty<T>(propertyName);
             property.SetValue(value, force);
         }
 
@@ -266,9 +200,9 @@ namespace Framework.ILR.Service.UI
         /// <typeparam name="T">值的类型</typeparam>
         /// <param name="propertyName">对应ViewModel中的BindableProperty的名字</param>
         /// <returns>对应的值</returns>
-        public T GetValue<T>(string propertyName)
+        public T GetProperty<T>(string propertyName)
         {
-            var property = GetProperty<T>(propertyName);
+            var property = GetBindableProperty<T>(propertyName);
             return property.Value;
         }
     }
