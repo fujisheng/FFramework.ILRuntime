@@ -4,6 +4,7 @@ using Framework.Service.Resource;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.TypeSystem;
 using ILRuntime.Mono.Cecil.Pdb;
+using ILRuntime.Runtime;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -78,8 +79,7 @@ namespace Framework.ILR.Service.Script
         /// <returns></returns>
         public async UniTask Load(string label)
         {
-            appdomain = new AppDomain();
-            appdomain.EnableRegisterVM = true;
+            appdomain = new AppDomain(ILRuntimeJITFlags.JITImmediately);
             await resourceLoader.PerloadAll<TextAsset>(label);
             gameStream = LoadDll(gameDllNames);
             InitializeILRuntime();
