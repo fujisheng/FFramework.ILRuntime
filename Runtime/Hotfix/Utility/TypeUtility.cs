@@ -6,7 +6,9 @@ namespace Framework.ILR.Utility
 {
     public static class TypeUtility
     {
-        static Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
+        public static readonly BindingFlags allFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
+
+        static readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
 
         /// <summary>
         /// 判断某个类型是否是某个类型的子类

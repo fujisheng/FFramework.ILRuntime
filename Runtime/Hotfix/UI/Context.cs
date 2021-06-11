@@ -2,10 +2,9 @@
 using Framework.ILR.Utility;
 using Framework.Service.Resource;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using ViewConfig = System.ValueTuple<string, int, int>;
 
 namespace Framework.ILR.Service.UI
 {
@@ -15,17 +14,14 @@ namespace Framework.ILR.Service.UI
         internal IView View { get; private set; }
         internal IResourceLoader ResourceLoader { get; private set; }
 
-        Dictionary<string, IBindableProperty> propertyCache;
-        (Type viewModelType, string assetName, int layer, int flag) bindInfo;
-        static BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
+        internal (string assetName, int layer, int flag) Config;
 
-        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, (Type viewModelType, string assetName, int layer, int flag) bindInfo)
+        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, ViewConfig config)
         {
-            this.ViewModel = viewModel;
-            this.View = view;
+            ViewModel = viewModel;
+            View = view;
             ResourceLoader = loader;
-            this.bindInfo = bindInfo;
-            propertyCache = new Dictionary<string, IBindableProperty>();
+            Config = config;
             view.Initialize();
         }
 
@@ -43,7 +39,7 @@ namespace Framework.ILR.Service.UI
         /// <returns></returns>
         public async UniTask<IView> CreateView()
         {
-            var assetName = bindInfo.assetName ?? View.ViewName;
+            var assetName = Config.assetName ?? View.ViewName;
             var viewObj = await ResourceLoader.InstantiateAsync(assetName);
             Object.DontDestroyOnLoad(viewObj);
             View.OnCreate(viewObj, this);
@@ -86,27 +82,12 @@ namespace Framework.ILR.Service.UI
         /// <returns></returns>
         IBindableProperty GetBindableProperty(string propertyName)
         {
-            bool get = propertyCache.TryGetValue(propertyName, out IBindableProperty field);
-            if (!get)
+            if (ViewModel == null)
             {
-                if (ViewModel == null)
-                {
-                    throw new Exception($"can not get property {propertyName}, please bind viewModel first");
-                }
-
-                var fieldInfo = ViewModel.GetType().GetField(propertyName, flags);
-                if (fieldInfo == null || ! typeof(IBindableProperty).IsAssignableFrom(fieldInfo.FieldType))
-                {
-                    throw new Exception($"can not get property {propertyName} with {ViewModel.GetType().FullName}, please check property name is right");
-                }
-
-                field = fieldInfo.GetValue(ViewModel) as IBindableProperty;
-                if(field != null)
-                {
-                    propertyCache.Add(propertyName, field);
-                }
+                throw new Exception($"can not get property {propertyName}, please bind viewModel first");
             }
-            return field;
+
+            return BindablePropertyUtility.GetBindableProperty(ViewModel, propertyName);
         }
 
         /// <summary>
@@ -143,7 +124,7 @@ namespace Framework.ILR.Service.UI
         /// <param name="target">要绑定的目标</param>
         public void BindingWithAttribute(object target)
         {
-            var methodInfos = target.GetType().GetMethods(flags);
+            var methodInfos = target.GetType().GetMethods(TypeUtility.allFlags);
             if(methodInfos == null)
             {
                 return;
@@ -159,7 +140,7 @@ namespace Framework.ILR.Service.UI
                     continue;
                 }
                 var property = GetBindableProperty(bindInfo.PropertyName);
-                var addMethodInfo = property.GetType().GetMethod("AddListener", flags, null, new Type[] {typeof(object), typeof(MethodInfo)}, null);
+                var addMethodInfo = property.GetType().GetMethod("AddListener", TypeUtility.allFlags, null, BindablePropertyUtility.AddWithMethodInfoParamType, null);
                 if (addMethodInfo == null)
                 {
                     continue;

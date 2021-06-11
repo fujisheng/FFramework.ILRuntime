@@ -9,7 +9,13 @@ namespace Framework.ILR.Service.UI
     /// <summary>
     /// 可绑定属性标记接口
     /// </summary>
-    public interface IBindableProperty{}
+    public interface IBindableProperty
+    {
+        /// <summary>
+        /// 释放
+        /// </summary>
+        void Release();
+    }
 
     /// <summary>
     /// 可绑定的属性
@@ -231,6 +237,17 @@ namespace Framework.ILR.Service.UI
             }
             RemoveListener(action);
 #endif
+        }
+
+        /// <summary>
+        /// 释放
+        /// </summary>
+        public void Release()
+        {
+            actions.Clear();
+            methodInfos.Clear();
+            delegates.Clear();
+            actionCatch.Clear();
         }
 
 #region 各种运算符重写

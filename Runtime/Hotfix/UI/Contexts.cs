@@ -1,24 +1,25 @@
 ﻿using FInject;
-using Framework.ILR.Service.Script;
 using Framework.ILR.Utility;
 using Framework.Service.Resource;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ViewConfig = System.ValueTuple<string, int, int>;
 
 namespace Framework.ILR.Service.UI
 {
     public static class Contexts
     {
-        static Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
-        static Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)> bindInfoCache = new Dictionary<Type, (Type viewModelType, string assetName, int layer, int flag)>();
+        static readonly Dictionary<Type, IViewModel> viewModelCache = new Dictionary<Type, IViewModel>();
+        static readonly Dictionary<Type, Type> bindInfoCache = new Dictionary<Type, Type>();
+        static readonly Dictionary<Type, ViewConfig> viewConfigCache = new Dictionary<Type, ViewConfig>();
 
         /// <summary>
         /// 初始化 直接初始化所有继承自PerloadViewModel的ViewModel
         /// </summary>
-        public static void Initialize(IScriptService scriptManager)
+        public static void Initialize(string[] types)
         {
-            foreach(var typeName in scriptManager.Types)
+            foreach(var typeName in types)
             {
                 var type = Type.GetType(typeName);
                 if(type == null)
@@ -47,13 +48,13 @@ namespace Framework.ILR.Service.UI
                 throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
             }
 
-            bool get = viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel);
-            if (!get)
+            if(!viewModelCache.TryGetValue(viewModelType, out IViewModel viewModel))
             {
                 viewModel = Activator.CreateInstance(viewModelType) as IViewModel;
                 viewModel.Initialize();
                 viewModelCache.Add(viewModelType, viewModel);
             }
+
             return viewModel;
         }
 
@@ -66,23 +67,22 @@ namespace Framework.ILR.Service.UI
         {
             return GetViewModel(typeof(TViewModel));
         }
-        
+
         /// <summary>
         /// 获取Bind信息
         /// </summary>
         /// <param name="viewType"></param>
         /// <returns></returns>
-        public static (Type viewModelType, string assetName, int layer, int flag) GetBindInfo(Type viewType)
+        static Type GetBindingViewModelType(Type viewType)
         {
             if (!viewType.Is<IView>())
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
 
-            var get = bindInfoCache.TryGetValue(viewType, out (Type viewModelType, string assetName, int layer, int flag) bindInfo);
-            if (get)
+            if(bindInfoCache.TryGetValue(viewType, out Type viewModelType))
             {
-                return bindInfo;
+                return viewModelType;
             }
 
             var bind = viewType.GetHotfixCustomAttribute<BindingAttribute>(true);
@@ -92,24 +92,36 @@ namespace Framework.ILR.Service.UI
             }
 
             //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
-            var viewModelType = TypeUtility.GetType(bind.ViewModelType.ToString());
+            viewModelType = TypeUtility.GetType(bind.ViewModelType.ToString());
             if (!viewModelType.Is<IViewModel>())
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(BindingAttribute).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
             }
-            bindInfo = (viewModelType, bind.AssetName, bind.Layer, bind.Flag);
-            bindInfoCache.Add(viewType, bindInfo);
-            return bindInfo;
+            bindInfoCache.Add(viewType, viewModelType);
+            return viewModelType;
         }
 
         /// <summary>
-        /// 获取Bind信息
+        /// 获取View的配置信息
         /// </summary>
-        /// <typeparam name="TView"></typeparam>
+        /// <param name="viewType">view类型</param>
         /// <returns></returns>
-        public static (Type viewModelType, string assetName, int layer, int flag) GetBindInfo<TView>() where TView : IView
+        static (string assetName, int layer, int flag) GetViewConfig(Type viewType)
         {
-            return GetBindInfo(typeof(TView));
+            if (!viewType.Is<IView>())
+            {
+                throw new Exception($"get view config failure, {viewType.FullName} is not {typeof(IView).FullName}");
+            }
+
+            if(viewConfigCache.TryGetValue(viewType, out var config))
+            {
+                return config;
+            }
+
+            var configInfo = viewType.GetHotfixCustomAttribute<ConfigAttribute>(true);
+            config = configInfo == null ? default : configInfo.ToTuple();
+            viewConfigCache.Add(viewType, config);
+            return config;
         }
 
         /// <summary>
@@ -126,7 +138,9 @@ namespace Framework.ILR.Service.UI
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
             var view = Activator.CreateInstance(viewType) as IView;
-            var context = new Context(viewModel, view, Injecter.CreateInstance<ResourceLoader>(), GetBindInfo(viewType));
+            var resourceLoader = Injecter.CreateInstance<ResourceLoader>();
+            var viewConfig = GetViewConfig(viewType);
+            var context = new Context(viewModel, view, resourceLoader, viewConfig);
             return context;
         }
 
@@ -148,8 +162,8 @@ namespace Framework.ILR.Service.UI
         /// <returns>context</returns>
         public static Context Create(Type viewType)
         {
-            var bindInfo = GetBindInfo(viewType);
-            return Create(bindInfo.viewModelType, viewType);
+            var viewModelType = GetBindingViewModelType(viewType);
+            return Create(viewModelType, viewType);
         }
 
         /// <summary>
