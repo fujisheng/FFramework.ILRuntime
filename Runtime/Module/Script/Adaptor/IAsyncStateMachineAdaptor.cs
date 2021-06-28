@@ -6,10 +6,10 @@ using ILRuntime.Runtime.Intepreter;
 
 namespace Framework.ILR.Service.Script.Adaptor
 {
-	/// <summary>
-	/// 用于async await适配
-	/// </summary>
-	public class IAsyncStateMachineClassInheritanceAdaptor : CrossBindingAdaptor
+    /// <summary>
+    /// 用于async await适配
+    /// </summary>
+    public class IAsyncStateMachineClassInheritanceAdaptor : CrossBindingAdaptor
 	{
 		public override Type BaseCLRType
 		{
