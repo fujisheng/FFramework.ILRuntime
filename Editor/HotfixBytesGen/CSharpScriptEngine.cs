@@ -11,7 +11,7 @@ public static class CSharpScriptEngine
 {
     public static Assembly GetAssembly(string[] fileStrings)
     {
-        var syntaxTrees = new SyntaxTree[fileStrings.Length];
+        var syntaxTrees = new Microsoft.CodeAnalysis.SyntaxTree[fileStrings.Length];
         for (int i = 0; i < fileStrings.Length; i++)
         {
             var tree = CSharpSyntaxTree.ParseText(fileStrings[i]);
