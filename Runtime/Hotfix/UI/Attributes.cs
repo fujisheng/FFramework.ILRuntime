@@ -8,7 +8,7 @@ namespace Framework.ILR.Service.UI
     [AttributeUsage(AttributeTargets.Class)]
     public class BindingAttribute : Attribute
     {
-        public Type ViewModelType { get; }
+        public readonly Type viewModelType;
         
         /// <summary>
         /// 将View绑定到某个ViewModel
@@ -16,7 +16,7 @@ namespace Framework.ILR.Service.UI
         /// <param name="viewModelType">viewModel的类型</param>
         public BindingAttribute(Type viewModelType)
         {
-            ViewModelType = viewModelType;
+            this.viewModelType = viewModelType;
         }
     }
 
@@ -26,9 +26,9 @@ namespace Framework.ILR.Service.UI
     [AttributeUsage(AttributeTargets.Class)]
     public class ConfigAttribute : Attribute
     {
-        public string AssetName { get; }
-        public int Layer { get; }
-        public int Flag { get; }
+        public readonly string assetName;
+        public readonly int layer;
+        public readonly int flag;
 
         /// <summary>
         /// View的一些配置信息
@@ -38,9 +38,9 @@ namespace Framework.ILR.Service.UI
         /// <param name="flag">一些标记</param>
         public ConfigAttribute(string assetName = null, int layer = UI.Layer.NORMAL, int flag = UI.Flag.NONE)
         {
-            AssetName = assetName;
-            Layer = layer;
-            Flag = flag;
+            this.assetName = assetName;
+            this.layer = layer;
+            this.flag = flag;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Framework.ILR.Service.UI
         /// <returns></returns>
         public (string assetName, int layer, int flag) ToTuple()
         {
-            return (AssetName, Layer, Flag);
+            return (assetName, layer, flag);
         }
     }
 
@@ -59,7 +59,7 @@ namespace Framework.ILR.Service.UI
     [AttributeUsage(AttributeTargets.Method)]
     public class OnValueChangedAttribute : Attribute
     {
-        public string PropertyName { get; }
+        public readonly string propertyName;
 
         /// <summary>
         /// 绑定某个方法到BindableProperty
@@ -67,7 +67,7 @@ namespace Framework.ILR.Service.UI
         /// <param name="propertyName">BindableProperty的名字</param>
         public OnValueChangedAttribute(string propertyName)
         {
-            PropertyName = propertyName;
+            this.propertyName = propertyName;
         }
     }
 
@@ -77,7 +77,7 @@ namespace Framework.ILR.Service.UI
     [AttributeUsage(AttributeTargets.Method)]
     public class OnOpenAttribute : Attribute
     {
-        public string ViewName { get; }
+        public readonly string viewName;
 
         /// <summary>
         /// 绑定某个方法到打开某个view事件
@@ -85,16 +85,17 @@ namespace Framework.ILR.Service.UI
         /// <param name="viewName">打开的view的名字</param>
         public OnOpenAttribute(string viewName)
         {
-            ViewName = viewName;
+            this.viewName = viewName;
         }
     }
 
     /// <summary>
     /// 绑定某个方法到关闭View事件
     /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
     public class OnCloseAttribute : Attribute
     {
-        public string ViewName { get; }
+        public readonly string viewName;
 
         /// <summary>
         /// 绑定某个方法到关闭View事件
@@ -102,7 +103,21 @@ namespace Framework.ILR.Service.UI
         /// <param name="viewName">关闭的View的名字</param>
         public OnCloseAttribute(string viewName)
         {
-            ViewName = viewName;
+            this.viewName = viewName;
+        }
+    }
+
+    /// <summary>
+    /// 标记这个View依赖于哪些界面
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class DependenciesAttribute : Attribute
+    {
+        public readonly Type[] dependenciesViewType;
+
+        public DependenciesAttribute(params Type[] dependenciesViewType)
+        {
+            this.dependenciesViewType = dependenciesViewType;
         }
     }
 }

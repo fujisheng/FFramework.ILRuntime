@@ -92,10 +92,10 @@ namespace Framework.ILR.Service.UI
             }
 
             //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
-            viewModelType = TypeUtility.GetType(bind.ViewModelType.ToString());
+            viewModelType = TypeUtility.GetType(bind.viewModelType.ToString());
             if (!viewModelType.Is<IViewModel>())
             {
-                throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(BindingAttribute).FullName}].ViewModelType [{bind.ViewModelType}] is not IViewModel");
+                throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(BindingAttribute).FullName}].ViewModelType [{bind.viewModelType}] is not IViewModel");
             }
             bindInfoCache.Add(viewType, viewModelType);
             return viewModelType;

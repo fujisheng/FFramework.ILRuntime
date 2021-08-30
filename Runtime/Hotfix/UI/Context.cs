@@ -139,7 +139,7 @@ namespace Framework.ILR.Service.UI
                 {
                     continue;
                 }
-                var property = GetBindableProperty(bindInfo.PropertyName);
+                var property = GetBindableProperty(bindInfo.propertyName);
                 var addMethodInfo = property.GetType().GetMethod("AddListener", TypeUtility.allFlags, null, BindablePropertyUtility.AddWithMethodInfoParamType, null);
                 if (addMethodInfo == null)
                 {
