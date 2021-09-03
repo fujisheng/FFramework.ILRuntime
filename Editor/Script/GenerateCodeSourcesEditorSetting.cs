@@ -48,4 +48,18 @@ namespace Framework.ILR.Editor
             return result.ToArray();
         }
     }
+
+    [CustomEditor(typeof(GenerateCodeSourcesEditorSetting))]
+    public class GenerateCodeSourceEditorSettingInspactor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            if (GUILayout.Button("Apply", GUILayout.MaxWidth(60f), GUILayout.MaxHeight(25f)))
+            {
+                GenerateCodeSourcesEditor.GenerateCodeSources();
+            }
+            base.OnInspectorGUI();
+
+        }
+    }
 }
