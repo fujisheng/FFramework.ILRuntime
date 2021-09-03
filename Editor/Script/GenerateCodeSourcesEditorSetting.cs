@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Framework.ILR.Editor
@@ -6,6 +8,8 @@ namespace Framework.ILR.Editor
     public class GenerateCodeSourcesEditorSetting : ScriptableObject
     {
         public string ScriptingDefineSymbols = string.Empty;
+        public OptimizationLevel optimizationLevel = OptimizationLevel.Debug;
+        public BuildTargetGroup targetGroup = BuildTargetGroup.Android;
         public List<string> HotfixPath = new List<string>()
         {
             "./FUPMPackages/com.fujisheng.fframework.ilruntime/Runtime/Hotfix/",
@@ -21,9 +25,19 @@ namespace Framework.ILR.Editor
             {
                 return null;
             }
-            var symbols = ScriptingDefineSymbols.Split(';');
             var result = new List<string>();
-            foreach(var symbol in symbols)
+            var unitySymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
+            result.AddRange(SplitSymbols(unitySymbols));
+            result.AddRange(SplitSymbols(ScriptingDefineSymbols));
+            return result.ToArray();
+        }
+
+        string[] SplitSymbols(string symbolsString)
+        {
+            var result = new List<string>();
+            var symbols = symbolsString.Split(';');
+
+            foreach (var symbol in symbols)
             {
                 if (string.IsNullOrEmpty(symbol))
                 {

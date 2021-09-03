@@ -19,9 +19,22 @@ namespace Framework.ILR.Editor
     [InitializeOnLoad]
     public class GenerateCodeSourcesEditor : UnityEditor.Editor
     {
+        static readonly string settingName = "GenerateCodeSourcesEditorSetting";
+        static readonly string createMenuName = "Tools/Framewrok.ILRuntime/CreateScriptEditorSetting";
         static GenerateCodeSourcesEditor()
         {
             CompilationPipeline.assemblyCompilationFinished += AssemblyCompilationFinishedCallback;
+        }
+
+        static bool LoadSetting(out GenerateCodeSourcesEditorSetting setting)
+        {
+            setting = EditorGUIUtility.Load($"{settingName}.asset") as GenerateCodeSourcesEditorSetting;
+            if (setting == null)
+            {
+                UnityEngine.Debug.LogWarning($"{settingName} is Empty, please create with menu [{createMenuName}]");
+                return false;
+            }
+            return true;
         }
 
         static void AssemblyCompilationFinishedCallback(string file, CompilerMessage[] messages)
@@ -30,12 +43,12 @@ namespace Framework.ILR.Editor
             {
                 return;
             }
-            var setting = EditorGUIUtility.Load("GenerateCodeSourcesEditorSetting.asset") as GenerateCodeSourcesEditorSetting;
-            if (setting == null)
+
+            if(!LoadSetting(out var setting))
             {
-                UnityEngine.Debug.LogWarning("GenerateCodeSourcesEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
                 return;
             }
+
             GenerateCodeSources();
         }
 
@@ -48,20 +61,17 @@ namespace Framework.ILR.Editor
             }
 
             var setting = CreateInstance<GenerateCodeSourcesEditorSetting>();
-            AssetDatabase.CreateAsset(setting, "Assets/Editor Default Resources/GenerateCodeSourcesEditorSetting.asset");
+            AssetDatabase.CreateAsset(setting, $"Assets/Editor Default Resources/{settingName}.asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
-        //TODO 基本功能已经跑通  后续可以添加自动分析引用，添加宏编译 自动编译等功能
         [MenuItem("Tools/Framework.ILRuntime/GenerateCodeSources")]
         public static void GenerateCodeSources()
         {
             //读取设置
-            var setting = EditorGUIUtility.Load("GenerateCodeSourcesEditorSetting.asset") as GenerateCodeSourcesEditorSetting;
-            if (setting == null)
+            if(!LoadSetting(out var setting))
             {
-                UnityEngine.Debug.LogWarning("GenerateCodeSourcesEditorSetting is Empty, please create with menu [Tools/Framewrok.ILRuntime/CreateScriptEditorSetting]");
                 return;
             }
 
@@ -79,9 +89,13 @@ namespace Framework.ILR.Editor
 
             //解析语法树
             var syntaxTrees = new Microsoft.CodeAnalysis.SyntaxTree[scripts.Count];
+            var parseOptions = new CSharpParseOptions()
+                .WithLanguageVersion(LanguageVersion.CSharp7_1)
+                .WithPreprocessorSymbols(setting.GetSymbols());
+
             for (int i = 0; i < scripts.Count; i++)
             {
-                var tree = CSharpSyntaxTree.ParseText(scripts[i], new CSharpParseOptions().WithLanguageVersion(LanguageVersion.CSharp7_1).WithPreprocessorSymbols(setting.GetSymbols()));
+                var tree = CSharpSyntaxTree.ParseText(scripts[i], parseOptions);
                 syntaxTrees[i] = tree;
             }
 
@@ -105,16 +119,18 @@ namespace Framework.ILR.Editor
             }
 
             //编译
-            CSharpCompilation compilation = CSharpCompilation.Create(
-                assemblyName,
-                syntaxTrees: syntaxTrees,
-                references: references,
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithOptimizationLevel(setting.optimizationLevel);
+            var compilation = CSharpCompilation.Create(assemblyName)
+                .AddSyntaxTrees(syntaxTrees)
+                .AddReferences(references)
+                .WithOptions(compilationOptions);
 
             using (var pdbStream = new MemoryStream())
             using (var dllStream = new MemoryStream())
             {
-                EmitResult result = compilation.Emit(dllStream, pdbStream, null, null, null, new EmitOptions(false, DebugInformationFormat.PortablePdb));
+                var emitOptions = new EmitOptions(false, DebugInformationFormat.PortablePdb);
+                var result = compilation.Emit(dllStream, pdbStream, null, null, null, emitOptions);
 
                 if (!result.Success)
                 {
@@ -126,19 +142,17 @@ namespace Framework.ILR.Editor
                     }
                     return;
                 }
-                else
-                {
-                    dllStream.Seek(0, SeekOrigin.Begin);
-                    pdbStream.Seek(0, SeekOrigin.Begin);
-                    var dllBytes = dllStream.ToArray();
-                    dllBytes = Utility.Encryption.AESEncrypt(dllBytes);
-                    var pdbBytes = pdbStream.ToArray();
-                    pdbBytes = Utility.Encryption.AESEncrypt(pdbBytes);
-                    File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.DllName}.bytes", dllBytes);
-                    File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.PdbName}.bytes", pdbBytes);
-                    UnityEngine.Debug.Log("GenerateCodeSources bytes success");
-                    AssetDatabase.Refresh();
-                }
+
+                dllStream.Seek(0, SeekOrigin.Begin);
+                pdbStream.Seek(0, SeekOrigin.Begin);
+                var dllBytes = dllStream.ToArray();
+                dllBytes = Utility.Encryption.AESEncrypt(dllBytes);
+                var pdbBytes = pdbStream.ToArray();
+                pdbBytes = Utility.Encryption.AESEncrypt(pdbBytes);
+                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.DllName}.bytes", dllBytes);
+                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.PdbName}.bytes", pdbBytes);
+                UnityEngine.Debug.Log("GenerateCodeSources bytes success");
+                AssetDatabase.Refresh();
             }
         }
     }
