@@ -12,7 +12,7 @@ namespace Framework.ILR.Service.UI
         public GameObject gameObject { get; private set; }
         public Transform transform { get; private set; }
         protected Context Context { get; private set; }
-        protected IResourceLoader ResourceLoader { get; private set; }
+        protected IResourceLoader Loader { get; private set; }
 
         public View() { }
         public virtual void Initialize(){}
@@ -22,7 +22,7 @@ namespace Framework.ILR.Service.UI
             this.gameObject = gameObject;
             transform = gameObject.transform;
             Context = context;
-            ResourceLoader = context.ResourceLoader;
+            Loader = context.ResourceLoader;
         }
 
         public virtual async UniTask Opening()
@@ -47,7 +47,7 @@ namespace Framework.ILR.Service.UI
 
         public virtual void OnDestroy()
         {
-            ResourceLoader.Release();
+            Loader.Release();
         }
     }
 }
