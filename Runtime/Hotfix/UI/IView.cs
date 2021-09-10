@@ -11,7 +11,7 @@ namespace Framework.ILR.Service.UI
 
         //View的生命周期
         void Initialize();
-        void OnCreate(GameObject gameObject, Context context);
+        void OnCreate(GameObject gameObject, IContext context);
         UniTask Opening();
         void OnOpen(object param);
         void OnFrontground();

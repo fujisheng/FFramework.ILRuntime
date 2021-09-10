@@ -11,13 +11,13 @@ namespace Framework.ILR.Service.UI
         public string ViewName{ get { if (_viewName == null) _viewName = GetType().Name; return _viewName; }}
         public GameObject gameObject { get; private set; }
         public Transform transform { get; private set; }
-        protected Context Context { get; private set; }
+        protected IContext Context { get; private set; }
         protected IResourceLoader Loader { get; private set; }
 
         public View() { }
         public virtual void Initialize(){}
 
-        public void OnCreate(GameObject gameObject, Context context)
+        public void OnCreate(GameObject gameObject, IContext context)
         {
             this.gameObject = gameObject;
             transform = gameObject.transform;

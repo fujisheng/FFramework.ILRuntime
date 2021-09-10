@@ -2,21 +2,21 @@
 using Framework.ILR.Utility;
 using Framework.Service.Resource;
 using System;
-using UnityEngine;
 using Object = UnityEngine.Object;
-using ViewConfig = System.ValueTuple<string, int, int>;
 
 namespace Framework.ILR.Service.UI
 {
-    public struct Context
+    using ViewConfig = System.ValueTuple<string, int, int>;
+
+    public class Context<TView, TViewModel> : IContext where TView : IView where TViewModel : IViewModel
     {
-        internal IViewModel ViewModel { get; private set; }
-        internal IView View { get; private set; }
-        internal IResourceLoader ResourceLoader { get; private set; }
+        public TViewModel ViewModel { get; private set; }
+        public TView View { get; private set; }
+        public IResourceLoader ResourceLoader { get; private set; }
 
         internal (string assetName, int layer, int flag) Config;
 
-        internal Context(IViewModel viewModel, IView view, IResourceLoader loader, ViewConfig config)
+        public Context(TView view, TViewModel viewModel, IResourceLoader loader, ViewConfig config)
         {
             ViewModel = viewModel;
             View = view;
@@ -25,19 +25,12 @@ namespace Framework.ILR.Service.UI
             view.Initialize();
         }
 
-        /// <summary>
-        /// 释放这个Context
-        /// </summary>
-        public void Release()
+        internal void Release()
         {
-            Debug.Log("Releasesssssssssssssssssssssssssssssssssssssssssssssss");
+            ResourceLoader.Release();
         }
 
-        /// <summary>
-        /// 创建View
-        /// </summary>
-        /// <returns></returns>
-        public async UniTask<IView> CreateView()
+        internal async UniTask<TView> CreateView()
         {
             var assetName = Config.assetName ?? View.ViewName;
             var viewObj = await ResourceLoader.InstantiateAsync(assetName);
@@ -46,12 +39,7 @@ namespace Framework.ILR.Service.UI
             return View;
         }
 
-        /// <summary>
-        /// 展示View
-        /// </summary>
-        /// <param name="param">参数</param>
-        /// <returns></returns>
-        public async UniTask ShowView(object param)
+        internal async UniTask ShowView(object param)
         {
             View.gameObject.SetActive(true);
             await View.Opening();
@@ -80,7 +68,7 @@ namespace Framework.ILR.Service.UI
         /// </summary>
         /// <param name="propertyName">属性的名字</param>
         /// <returns></returns>
-        IBindableProperty GetBindableProperty(string propertyName)
+        protected virtual IBindableProperty GetBindableProperty(string propertyName)
         {
             if (ViewModel == null)
             {
@@ -96,10 +84,10 @@ namespace Framework.ILR.Service.UI
         /// <typeparam name="T">属性值的类型</typeparam>
         /// <param name="propertyName">属性的名字</param>
         /// <returns></returns>
-        BindableProperty<T> GetBindableProperty<T>(string propertyName)
+        protected virtual BindableProperty<T> GetBindableProperty<T>(string propertyName)
         {
             var property = GetBindableProperty(propertyName);
-            if(!(property is BindableProperty<T>))
+            if (!(property is BindableProperty<T>))
             {
                 throw new Exception($"{propertyName} is {property.GetType().FullName} not {typeof(BindableProperty<T>)}");
             }
@@ -122,20 +110,20 @@ namespace Framework.ILR.Service.UI
         /// 通过OnValueChanged这个特性来绑定对应的Property到某个方法
         /// </summary>
         /// <param name="target">要绑定的目标</param>
-        public void BindingWithAttribute(object target)
+        public virtual void BindingWithAttribute()
         {
-            var methodInfos = target.GetType().GetMethods(TypeUtility.allFlags);
-            if(methodInfos == null)
+            var methodInfos = View.GetType().GetMethods(TypeUtility.allFlags);
+            if (methodInfos == null)
             {
                 return;
             }
 
-            for(int i = 0; i < methodInfos.Length; i++)
+            for (int i = 0; i < methodInfos.Length; i++)
             {
                 var methodInfo = methodInfos[i];
                 var bindInfo = methodInfo.GetHotfixCustomAttribute<OnValueChangedAttribute>(true);
 
-                if(bindInfo == null)
+                if (bindInfo == null)
                 {
                     continue;
                 }
@@ -146,7 +134,7 @@ namespace Framework.ILR.Service.UI
                     continue;
                 }
 
-                addMethodInfo.Invoke(property, new object[] { target, methodInfo });
+                addMethodInfo.Invoke(property, new object[] { View, methodInfo });
             }
         }
 

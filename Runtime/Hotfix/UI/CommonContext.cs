@@ -8,6 +8,8 @@ using ViewConfig = System.ValueTuple<string, int, int>;
 
 namespace Framework.ILR.Service.UI
 {
+    using ViewConfig = System.ValueTuple<string, int, int>;
+
     public class CommonContext : Context<IView, IViewModel>
     {
         internal CommonContext(IView view, IViewModel viewModel, IResourceLoader loader, ViewConfig config) : base(view, viewModel, loader, config) { }

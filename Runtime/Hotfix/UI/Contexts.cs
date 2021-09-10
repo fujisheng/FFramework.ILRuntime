@@ -63,9 +63,9 @@ namespace Framework.ILR.Service.UI
         /// </summary>
         /// <typeparam name="TViewModel"></typeparam>
         /// <returns></returns>
-        public static IViewModel GetViewModel<TViewModel>() where TViewModel : IViewModel
+        public static TViewModel GetViewModel<TViewModel>() where TViewModel : IViewModel
         {
-            return GetViewModel(typeof(TViewModel));
+            return (TViewModel)GetViewModel(typeof(TViewModel));
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Framework.ILR.Service.UI
         /// <param name="viewModelType">ViewModel的类型</param>
         /// <param name="viewType">View的类型</param>
         /// <returns>context</returns>
-        public static Context Create(Type viewModelType, Type viewType)
+        public static IContext Create(Type viewModelType, Type viewType)
         {
             var viewModel = GetViewModel(viewModelType);
             if (!viewType.Is<IView>())
@@ -140,7 +140,7 @@ namespace Framework.ILR.Service.UI
             var view = Activator.CreateInstance(viewType) as IView;
             var resourceLoader = Injecter.CreateInstance<ResourceLoader>();
             var viewConfig = GetViewConfig(viewType);
-            var context = new Context(viewModel, view, resourceLoader, viewConfig);
+            var context = new Context<IView, IViewModel>(view, viewModel, resourceLoader, viewConfig);
             return context;
         }
 
@@ -150,7 +150,7 @@ namespace Framework.ILR.Service.UI
         /// <typeparam name="TViewModel">viewModel Type</typeparam>
         /// <typeparam name="TView">view Type</typeparam>
         /// <returns>context</returns>
-        public static Context Create<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
+        public static IContext Create<TViewModel, TView>() where TViewModel : IViewModel where TView : IView
         {
             return Create(typeof(TViewModel), typeof(TView));
         }
@@ -160,7 +160,7 @@ namespace Framework.ILR.Service.UI
         /// </summary>
         /// <param name="viewType">View的类型</param>
         /// <returns>context</returns>
-        public static Context Create(Type viewType)
+        public static IContext Create(Type viewType)
         {
             var viewModelType = GetBindingViewModelType(viewType);
             return Create(viewModelType, viewType);
@@ -171,7 +171,7 @@ namespace Framework.ILR.Service.UI
         /// </summary>
         /// <typeparam name="TView">View</typeparam>
         /// <returns>context</returns>
-        public static Context Create<TView>() where TView : IView
+        public static IContext Create<TView>() where TView : IView
         {
             return Create(typeof(TView));
         }
