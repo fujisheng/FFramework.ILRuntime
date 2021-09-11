@@ -30,7 +30,7 @@ namespace Framework.ILR.Service.UI
             ResourceLoader.Release();
         }
 
-        internal async UniTask<TView> CreateView()
+        public async UniTask<IView> CreateView()
         {
             var assetName = Config.assetName ?? View.ViewName;
             var viewObj = await ResourceLoader.InstantiateAsync(assetName);

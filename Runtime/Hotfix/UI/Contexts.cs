@@ -140,7 +140,7 @@ namespace Framework.ILR.Service.UI
             var view = Activator.CreateInstance(viewType) as IView;
             var resourceLoader = Injecter.CreateInstance<ResourceLoader>();
             var viewConfig = GetViewConfig(viewType);
-            var contextType = TypeUtility.GetType($"{viewType.Name}_{viewModelType.Name}_Context");
+            var contextType = TypeUtility.GetType($"Game.Hotfix.{viewType.Name}_{viewModelType.Name}_Context");
             if(contextType != null)
             {
                 return (IContext)Activator.CreateInstance(contextType, new object[] { view, viewModel, resourceLoader, viewConfig });
