@@ -140,8 +140,12 @@ namespace Framework.ILR.Service.UI
             var view = Activator.CreateInstance(viewType) as IView;
             var resourceLoader = Injecter.CreateInstance<ResourceLoader>();
             var viewConfig = GetViewConfig(viewType);
-            var context = new Context<IView, IViewModel>(view, viewModel, resourceLoader, viewConfig);
-            return context;
+            var contextType = TypeUtility.GetType($"{viewType.Name}_{viewModelType.Name}_Context");
+            if(contextType != null)
+            {
+                return (IContext)Activator.CreateInstance(contextType, new object[] { view, viewModel, resourceLoader, viewConfig });
+            }
+            return new Context<IView, IViewModel>(view, viewModel, resourceLoader, viewConfig);
         }
 
         /// <summary>
