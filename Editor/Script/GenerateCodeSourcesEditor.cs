@@ -1,10 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEditor.Compilation;
 
@@ -76,52 +78,55 @@ namespace Framework.ILR.Editor
             }
 
             //读取脚本
-            List<string> scripts = new List<string>();
-            foreach(var fileDirectory in setting.HotfixPath)
+            List<(string path, string text)> texts = new List<(string, string)>();
+            foreach (var fileDirectory in setting.HotfixPath)
             {
                 var files = Directory.GetFiles(fileDirectory, "*.cs", SearchOption.AllDirectories);
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     var script = File.ReadAllText(file);
-                    scripts.Add(script);
+                    texts.Add((file, script));
                 }
             }
 
             //解析语法树
-            var syntaxTrees = new Microsoft.CodeAnalysis.SyntaxTree[scripts.Count];
+            var syntaxTrees = new List<Microsoft.CodeAnalysis.SyntaxTree>(texts.Count);
             var parseOptions = new CSharpParseOptions()
                 .WithLanguageVersion(LanguageVersion.CSharp7_1)
                 .WithPreprocessorSymbols(setting.GetSymbols());
 
-            for (int i = 0; i < scripts.Count; i++)
+            foreach (var text in texts)
             {
-                var tree = CSharpSyntaxTree.ParseText(scripts[i], parseOptions);
-                syntaxTrees[i] = tree;
+                var tree = CSharpSyntaxTree.ParseText(text.text, parseOptions, text.path, Encoding.UTF8);
+                syntaxTrees.Add(tree);
             }
 
-            string assemblyName = Path.GetRandomFileName();
+            //添加引用
             var currentAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             var references = new List<MetadataReference>();
 
             foreach (var assembly in currentAssemblies)
             {
+                if (assembly.IsDynamic)
+                {
+                    continue;
+                }
                 if (string.IsNullOrEmpty(assembly.Location))
                 {
                     continue;
                 }
 
-                if (assembly.Location.EndsWith(".Hotfix.dll"))
+                if (assembly.Location.EndsWith("Hotfix.dll"))
                 {
                     continue;
                 }
-
                 references.Add(MetadataReference.CreateFromFile(assembly.Location));
             }
 
             //编译
             var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 .WithOptimizationLevel(setting.optimizationLevel);
-            var compilation = CSharpCompilation.Create(assemblyName)
+            var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(setting.DllName))
                 .AddSyntaxTrees(syntaxTrees)
                 .AddReferences(references)
                 .WithOptions(compilationOptions);
@@ -130,7 +135,14 @@ namespace Framework.ILR.Editor
             using (var dllStream = new MemoryStream())
             {
                 var emitOptions = new EmitOptions(false, DebugInformationFormat.PortablePdb);
-                var result = compilation.Emit(dllStream, pdbStream, null, null, null, emitOptions);
+                var embeddedTexts = new List<EmbeddedText>();
+                foreach (var text in texts)
+                {
+                    var sourceBuffer = Encoding.UTF8.GetBytes(text.text);
+                    var sourceText = SourceText.From(sourceBuffer, sourceBuffer.Length, Encoding.UTF8, SourceHashAlgorithm.Sha1, false, true);
+                    embeddedTexts.Add(EmbeddedText.FromSource(text.path, sourceText));
+                }
+                var result = compilation.Emit(dllStream, pdbStream, null, null, null, emitOptions, null, null, embeddedTexts);
 
                 if (!result.Success)
                 {
@@ -146,12 +158,10 @@ namespace Framework.ILR.Editor
                 dllStream.Seek(0, SeekOrigin.Begin);
                 pdbStream.Seek(0, SeekOrigin.Begin);
                 var dllBytes = dllStream.ToArray();
-                dllBytes = Utility.Encryption.AESEncrypt(dllBytes);
                 var pdbBytes = pdbStream.ToArray();
-                pdbBytes = Utility.Encryption.AESEncrypt(pdbBytes);
-                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.DllName}.bytes", dllBytes);
-                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.PdbName}.bytes", pdbBytes);
-                UnityEngine.Debug.Log("GenerateCodeSources bytes success");
+                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.DllName}.bytes", Utility.Encryption.AESEncrypt(dllBytes));
+                File.WriteAllBytes($"{setting.CodeSourcesPath}/{setting.PdbName}.bytes", Utility.Encryption.AESEncrypt(pdbBytes));
+                UnityEngine.Debug.Log("热更工程编译完成");
                 AssetDatabase.Refresh();
             }
         }

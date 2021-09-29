@@ -18,6 +18,7 @@ namespace Framework.ILR.Service.UI
 
         public Context(TView view, TViewModel viewModel, IResourceLoader loader, ViewConfig config)
         {
+            UnityEngine.Debug.Log("Context<>Ctor");
             ViewModel = viewModel;
             View = view;
             ResourceLoader = loader;

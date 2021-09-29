@@ -21,13 +21,13 @@ namespace Framework.ILR.Editor
 
         public string[] GetSymbols()
         {
-            if (string.IsNullOrEmpty(ScriptingDefineSymbols))
-            {
-                return null;
-            }
             var result = new List<string>();
             var unitySymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(targetGroup);
             result.AddRange(SplitSymbols(unitySymbols));
+            if (string.IsNullOrEmpty(ScriptingDefineSymbols))
+            {
+                return result.ToArray();
+            }
             result.AddRange(SplitSymbols(ScriptingDefineSymbols));
             return result.ToArray();
         }
@@ -59,7 +59,6 @@ namespace Framework.ILR.Editor
                 GenerateCodeSourcesEditor.GenerateCodeSources();
             }
             base.OnInspectorGUI();
-
         }
     }
 }
