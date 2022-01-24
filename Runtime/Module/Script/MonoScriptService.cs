@@ -20,7 +20,7 @@ namespace Framework.ILR.Service.Script
         static MonoScriptService instance;
         public static MonoScriptService Instance
         {
-            get { return instance ?? (instance = Injecter.CreateInstance<MonoScriptService>()); }
+            get { return instance ?? (instance = Bootstrapper.CreateInstance<MonoScriptService>()); }
         }
 
         string[] types;
@@ -54,6 +54,7 @@ namespace Framework.ILR.Service.Script
         [Inject]
         public void SetResourceLoader(IResourceLoader resourceLoader)
         {
+            Framework.Utility.Assert.IfNull(resourceLoader, new System.Exception("resourceLoader can not be null"));
             this.resourceLoader = resourceLoader;
         }
 
@@ -64,6 +65,8 @@ namespace Framework.ILR.Service.Script
         /// <returns></returns>
         public async UniTask Load(string label)
         {
+            Framework.Utility.Assert.IfNull(resourceLoader, new System.Exception("resourceLoader can not be null, please call SetResourceLoader first"));
+
             await resourceLoader.PerloadAll<TextAsset>(label);
             LoadDll(gameDllNames);
         }

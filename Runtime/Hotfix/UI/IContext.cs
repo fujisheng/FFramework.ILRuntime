@@ -7,7 +7,8 @@ namespace Framework.ILR.Service.UI
     public interface IContext
     {
         IResourceLoader ResourceLoader { get; }
-        UniTask<IView> CreateView();
+        //UniTask<IView> CreateView();
+        IView CreateView();
         void Binding<T>(string propertyName, Action<T, T> listener);
         void Unbind<T>(string propertyName, Action<T, T> listener);
         void BindingWithAttribute();

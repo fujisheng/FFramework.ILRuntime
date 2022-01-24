@@ -43,6 +43,7 @@ namespace Framework.ILR.Service.UI
         /// <returns></returns>
         public static IViewModel GetViewModel(Type viewModelType)
         {
+            UnityEngine.Debug.Log(viewModelType);
             if (!viewModelType.Is<IViewModel>())
             {
                 throw new Exception($"get ViewModel failure, {viewModelType.FullName} is not IViewModel");
@@ -93,12 +94,13 @@ namespace Framework.ILR.Service.UI
 
             //这儿之所以这样是因为在ILRuntime中Attribute只支持基本类型 其它类型会报错
             viewModelType = TypeUtility.GetType(bind.viewModelType.ToString());
-            if (!viewModelType.Is<IViewModel>())
+            UnityEngine.Debug.Log(bind.viewModelType);
+            if (!bind.viewModelType.Is<IViewModel>())// viewModelType.Is<IViewModel>())
             {
                 throw new Exception($"get bind info failure, {viewType.FullName} [{typeof(BindingAttribute).FullName}].ViewModelType [{bind.viewModelType}] is not IViewModel");
             }
-            bindInfoCache.Add(viewType, viewModelType);
-            return viewModelType;
+            bindInfoCache.Add(viewType, bind.viewModelType);// viewModelType);
+            return bind.viewModelType;// viewModelType;
         }
 
         /// <summary>
@@ -138,7 +140,7 @@ namespace Framework.ILR.Service.UI
                 throw new Exception($"create context failure, {viewType.FullName} is not {typeof(IView).FullName}");
             }
             var view = Activator.CreateInstance(viewType) as IView;
-            var resourceLoader = Injecter.CreateInstance<ResourceLoader>();
+            var resourceLoader = Bootstrapper.CreateInstance<ResourceLoader>();
             var viewConfig = GetViewConfig(viewType);
             var contextType = TypeUtility.GetType($"Game.Hotfix.{viewType.Name}_{viewModelType.Name}_Context");
             if(contextType != null)

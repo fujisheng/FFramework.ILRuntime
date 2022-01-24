@@ -31,10 +31,10 @@ namespace Framework.ILR.Service.UI
             ResourceLoader.Release();
         }
 
-        public async UniTask<IView> CreateView()
+        public IView CreateView()
         {
             var assetName = Config.assetName ?? View.ViewName;
-            var viewObj = await ResourceLoader.InstantiateAsync(assetName);
+            var viewObj = UnityEngine.Object.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>("Assets/Sources/Prefabs/HomeView.prefab"));// await ResourceLoader.InstantiateAsync(assetName);
             Object.DontDestroyOnLoad(viewObj);
             View.OnCreate(viewObj, this);
             return View;

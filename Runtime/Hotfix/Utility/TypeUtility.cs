@@ -56,6 +56,12 @@ namespace Framework.ILR.Utility
         /// <returns></returns>
         public static Type GetType(string typeName)
         {
+            foreach(var s in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                UnityEngine.Debug.Log(s);
+            }
+            
+            UnityEngine.Debug.Log($"GetType:{typeName} = {Type.GetType(typeName)}");
             bool get = typeCache.TryGetValue(typeName, out Type type);
             if (get)
             {

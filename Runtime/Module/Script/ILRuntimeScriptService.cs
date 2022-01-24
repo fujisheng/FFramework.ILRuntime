@@ -26,7 +26,7 @@ namespace Framework.ILR.Service.Script
         static ILRuntimeScriptService instance;
         public static ILRuntimeScriptService Instance
         {
-            get { return instance ?? (instance = Injecter.CreateInstance<ILRuntimeScriptService>()); }
+            get { return instance ?? (instance = Bootstrapper.CreateInstance<ILRuntimeScriptService>()); }
         }
 
         string[] types;
@@ -59,6 +59,7 @@ namespace Framework.ILR.Service.Script
         [Inject]
         public void SetResourceLoader(IResourceLoader resourceLoader)
         {
+            Framework.Utility.Assert.IfNull(resourceLoader, new System.Exception("resourceLoader can not be null"));
             this.resourceLoader = resourceLoader;
         }
 
@@ -69,6 +70,7 @@ namespace Framework.ILR.Service.Script
         [Inject]
         public void SetReginster(IILRuntimeReginster reginster)
         {
+            Framework.Utility.Assert.IfNull(reginster, new System.Exception("reginster can not be null"));
             this.reginster = reginster;
         }
 
@@ -79,6 +81,8 @@ namespace Framework.ILR.Service.Script
         /// <returns></returns>
         public async UniTask Load(string label)
         {
+            Framework.Utility.Assert.IfNull(resourceLoader, new System.Exception("resourceLoader can not be null, please call SetResourceLoader first"));
+
             appdomain = new AppDomain(ILRuntimeJITFlags.JITImmediately);
             await resourceLoader.PerloadAll<TextAsset>(label);
             gameStream = LoadDll(gameDllNames);
@@ -110,6 +114,8 @@ namespace Framework.ILR.Service.Script
             //由于Unity的Profiler接口只允许在主线程使用，为了避免出异常，需要告诉ILRuntime主线程的线程ID才能正确将函数运行耗时报告给Profiler
             appdomain.UnityMainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 #endif
+            Framework.Utility.Assert.IfNull(reginster, new System.Exception("reginster can not be null, please call SetReginster first"));
+
             reginster.Reginster(appdomain);
         }
 
