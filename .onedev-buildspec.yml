@@ -8,7 +8,7 @@ jobs:
     userName: fujisheng
     passwordSecret: github
     withLfs: false
-    force: false
+    force: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger {}
